@@ -1,26 +1,26 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ScreepsDotNet
-{
-    public static partial class Program
-    {
-        private static API.World.IGame? game;
-        private static API.Bot.IBot? bot;
+namespace ScreepsDotNet;
 
-        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, typeof(Program))]
-        public static void Main()
-        {
+public static partial class Program
+{
+    private static API.World.IGame? game;
+    private static API.Bot.IBot? bot;
+
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, typeof(Program))]
+    public static void Main()
+    {
 
         }
 
-        [System.Runtime.Versioning.SupportedOSPlatform("wasi")]
-        public static void Init()
-        {
+    [System.Runtime.Versioning.SupportedOSPlatform("wasi")]
+    public static void Init()
+    {
             try
             {
                 game = new Native.World.NativeGame();
-                bot = new ExampleWorldBot.BasicExample(game);
+                bot = new FriendlyWorldBot.BasicExample(game);
             }
             catch (Exception e)
             {
@@ -28,9 +28,9 @@ namespace ScreepsDotNet
             }
         }
 
-        [System.Runtime.Versioning.SupportedOSPlatform("wasi")]
-        public static void Loop()
-        {
+    [System.Runtime.Versioning.SupportedOSPlatform("wasi")]
+    public static void Loop()
+    {
             try
             {
                 game?.Tick();
@@ -44,8 +44,8 @@ namespace ScreepsDotNet
             }
         }
 
-        private static void CheckHeap(in API.HeapInfo heapInfo)
-        {
+    private static void CheckHeap(in API.HeapInfo heapInfo)
+    {
             if (ticksSinceLastGC < 10) { return; }
             var heapUsageFrac = (heapInfo.TotalHeapSize + heapInfo.ExternallyAllocatedSize) / (double)heapInfo.HeapSizeLimit;
             if (heapUsageFrac > 0.65)
@@ -67,11 +67,11 @@ namespace ScreepsDotNet
             }
         }
 
-        private static readonly int[] lastCollectCount = new int[GC.MaxGeneration];
-        private static int ticksSinceLastGC = 0;
+    private static readonly int[] lastCollectCount = new int[GC.MaxGeneration];
+    private static int ticksSinceLastGC = 0;
 
-        private static void LogGCActivity()
-        {
+    private static void LogGCActivity()
+    {
             bool didGC = false;
             for (int i = 0; i < GC.MaxGeneration; ++i)
             {
@@ -85,5 +85,4 @@ namespace ScreepsDotNet
             }
             if (!didGC) { ++ticksSinceLastGC; }
         }
-    }
 }

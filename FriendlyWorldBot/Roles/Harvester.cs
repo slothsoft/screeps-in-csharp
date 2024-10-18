@@ -4,7 +4,7 @@ using System.Linq;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
 
-namespace ScreepsDotNet.ExampleWorldBot.Roles;
+namespace FriendlyWorldBot.Roles;
 
 /// <summary>
 /// The harvester role will instruct creeps to harvest the nearest source until they're full, then return to the nearest spawn and deposit energy.

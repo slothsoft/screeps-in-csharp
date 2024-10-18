@@ -1,6 +1,6 @@
 ﻿using ScreepsDotNet.API.World;
 
-namespace ScreepsDotNet.ExampleWorldBot.Roles;
+namespace FriendlyWorldBot.Roles;
 
 public interface IRole
 {

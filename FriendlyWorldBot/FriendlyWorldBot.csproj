@@ -25,4 +25,17 @@
 		<PackageReference Include="ScreepsDotNet.Bundler" Version="2.1.0" PrivateAssets="All" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<ScreepsWorldStartup Include="$(MSBuildThisFileDirectory)js\console-commands.js" />
+	</ItemGroup>
+
+	<Target Name="CopyPublishedDataToScreeps" AfterTargets="MSDeployPublish;AfterPublish">
+		<ItemGroup>
+			<MySourceFiles Include="$(PublishDir)..\AppBundle\world\**\*.*"/>
+		</ItemGroup>
+
+		<Message Text="Copy @(MySourceFiles) to screeps folder" />
+		<Copy SourceFiles="@(MySourceFiles)" DestinationFolder="C:\Users\Steffi\AppData\Local\Screeps\scripts\old_bloodmoon_network_de___21025\default\" />
+	</Target>
+
 </Project>

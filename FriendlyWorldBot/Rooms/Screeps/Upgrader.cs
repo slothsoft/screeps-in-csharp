@@ -5,18 +5,18 @@ using System.Linq;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
 
-namespace FriendlyWorldBot.Roles;
+namespace FriendlyWorldBot.Rooms.Screeps;
 
 /// <summary>
 /// The upgrader role will instruct creeps to collect energy from the spawn, then upgrade the room controller.
 /// Spawns will be cached to the heap for efficiency.
 /// </summary>
 /// <param name="room"></param>
-public class Upgrader(IRoom room) : IRole
+public class Upgrader(IRoom room) : IJob
 {
-    private readonly IRoom room = room;
+    private readonly IRoom _room = room;
 
-    private readonly List<IStructureSpawn> cachedSpawns = [];
+    private readonly List<IStructureSpawn> _cachedSpawns = [];
 
     public void Run(ICreep creep)
     {
@@ -24,7 +24,7 @@ public class Upgrader(IRoom room) : IRole
         if (creep.Store[ResourceType.Energy] > 0)
         {
             // There is energy to use - upgrade the controller
-            var controller = room.Controller;
+            var controller = _room.Controller;
             if (controller == null) { return; }
             var upgradeResult = creep.UpgradeController(controller);
             if (upgradeResult == CreepUpgradeControllerResult.NotInRange)
@@ -56,16 +56,16 @@ public class Upgrader(IRoom room) : IRole
     private IStructureSpawn? FindNearestSpawn(Position pos)
     {
         // If there are no spawns in the cache, assume the cache has not yet been built, so populate it
-        if (cachedSpawns.Count == 0)
+        if (_cachedSpawns.Count == 0)
         {
-            foreach (var spawn in room.Find<IStructureSpawn>())
+            foreach (var spawn in _room.Find<IStructureSpawn>())
             {
-                cachedSpawns.Add(spawn);
+                _cachedSpawns.Add(spawn);
             }
         }
 
         // Now find the one closest to the position (don't forget to check that it wasn't destroyed - we might want to do some cleanup of the cache if this happens)
-        return cachedSpawns
+        return _cachedSpawns
             .Where(static x => x.Exists)
             .MinBy(x => x.LocalPosition.LinearDistanceTo(pos));
     }

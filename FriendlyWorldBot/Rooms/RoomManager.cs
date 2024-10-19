@@ -5,9 +5,9 @@ using System.Linq;
 
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
-using FriendlyWorldBot.Roles;
+using FriendlyWorldBot.Rooms.Screeps;
 
-namespace FriendlyWorldBot;
+namespace FriendlyWorldBot.Rooms;
 
 /// <summary>
 /// The room manager will take care of all creep and spawning logic for a certain room controlled by our bot.
@@ -17,18 +17,20 @@ public class RoomManager
     private readonly IGame game;
     private readonly IRoom room;
 
-    private readonly Dictionary<string, IRole> roleMap = [];
+    private readonly Dictionary<string, IJob> roleMap = [];
 
     private readonly HashSet<IStructureSpawn> cachedSpawns = [];
 
     private readonly HashSet<ICreep> allCreeps = [];
     private readonly HashSet<ICreep> harvesterCreeps = [];
     private readonly HashSet<ICreep> upgraderCreeps = [];
+    private readonly HashSet<ICreep> builderCreeps = [];
 
     private readonly Random rng = new();
 
     private const int targetMinerCount = 3;
     private const int targetUpgraderCount = 3;
+    private const int targetBuilderCount = 3;
 
     private static readonly BodyType<BodyPartType> workerBodyType = new([(BodyPartType.Move, 1), (BodyPartType.Carry, 1), (BodyPartType.Work, 1)]);
 
@@ -40,7 +42,8 @@ public class RoomManager
         // Populate role map - the role instances will live in the heap until the next IVM reset
         roleMap.Add("harvester", new Harvester(room));
         roleMap.Add("upgrader", new Upgrader(room));
-
+        roleMap.Add("builder", new Builder(room));
+        
         // Populate the spawns cache
         // TODO: We're going to want a way to update this periodically in case new spawns get built or old ones destroyed
         // We use a cache because calls to room.Find are expensive on CPU usage!
@@ -94,6 +97,9 @@ public class RoomManager
             case Upgrader:
                 upgraderCreeps.Add(creep);
                 break;
+            case Builder:
+                builderCreeps.Add(creep);
+                break;
             default:
                 Console.WriteLine($"{this}: {creep} has unknown role!");
                 break;
@@ -105,6 +111,7 @@ public class RoomManager
         // Remove it from all tracking lists
         harvesterCreeps.Remove(creep);
         upgraderCreeps.Remove(creep);
+        builderCreeps.Remove(creep);
         Console.WriteLine($"{this}: {creep} died");
     }
 
@@ -119,6 +126,9 @@ public class RoomManager
         else if (upgraderCreeps.Count < targetUpgraderCount)
         {
             TrySpawnCreep(spawn, workerBodyType, "upgrader");
+        } if (builderCreeps.Count < targetBuilderCount)
+        {
+            TrySpawnCreep(spawn, workerBodyType, "builder");
         }
     }
 
@@ -144,10 +154,10 @@ public class RoomManager
         role.Run(creep);
     }
 
-    private IRole? GetCreepRole(ICreep creep)
+    private IJob? GetCreepRole(ICreep creep)
     {
         // First, see if we've stored the role instance on the creep from a previous tick (this will save us some CPU)
-        if (creep.TryGetUserData<IRole>(out var role)) { return role; }
+        if (creep.TryGetUserData<IJob>(out var role)) { return role; }
 
         // Lookup their role from memory
         if (!creep.Memory.TryGetString("role", out var roleName)) { return null; }

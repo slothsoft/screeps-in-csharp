@@ -63,4 +63,8 @@ public static class MemoryUtil {
             _ticksSinceLastGc = 0;
         }
     }
+
+    public static bool GetConfigBool(this IMemoryObject memory, string id) {
+        return memory.GetOrCreateObject("config").TryGetBool(id, out var result) && result;
+    }
 }

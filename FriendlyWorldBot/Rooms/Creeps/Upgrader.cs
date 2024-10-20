@@ -29,7 +29,7 @@ public class Upgrader : IJob
             }
             var upgradeResult = creep.UpgradeController(controller);
             if (upgradeResult == CreepUpgradeControllerResult.NotInRange) {
-                creep.MoveTo(controller.RoomPosition);
+                creep.BetterMoveTo(controller.RoomPosition);
             } else if (upgradeResult != CreepUpgradeControllerResult.Ok) {
                 creep.Say("⚠");
                 creep.LogInfo($"unexpected result when depositing to {controller} ({upgradeResult})");
@@ -37,11 +37,14 @@ public class Upgrader : IJob
         } else {
             // We're empty - go to pick up
             var spawn = _room.FindNearestSpawn(creep.LocalPosition);
-            if (spawn == null) { return; }
+            if (spawn == null || spawn.Store.GetUsedCapacity() < 10) { // TODO: magic number
+                creep.MineResource(_room);
+                return; 
+            }
             var withdrawResult = creep.Withdraw(spawn, ResourceType.Energy);
             if (withdrawResult == CreepWithdrawResult.NotInRange)
             {
-                creep.MoveTo(spawn.RoomPosition);
+                creep.BetterMoveTo(spawn.RoomPosition);
             }
             else if (withdrawResult != CreepWithdrawResult.Ok)
             {

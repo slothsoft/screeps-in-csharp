@@ -36,7 +36,7 @@ public class Builder : IJob {
             RunInMinerMode(creep);
 
             if (creep.Store.GetFreeCapacity(ResourceType.Energy) == 0) {
-                // we cannot mind any longer, so switch to builder mode
+                // we cannot mine any longer, so switch to builder mode
                 creep.Memory.SetValue(MemoryIsBuilding, true);
             }
         }
@@ -47,14 +47,14 @@ public class Builder : IJob {
         if (constructionSite != null) {
             var transferResult = creep.Build(constructionSite);
             if (transferResult == CreepBuildResult.NotInRange) {
-                creep.MoveTo(constructionSite.RoomPosition);
+                creep.BetterMoveTo(constructionSite.RoomPosition);
             } else if (transferResult != CreepBuildResult.Ok) {
                 creep.LogInfo($"unexpected result when depositing to {constructionSite} ({transferResult})");
             }
+        } else {
+            // no construction sites, so the builder switches to miner to be useful
+            creep.PutIntoStorage(_room);
         }
-
-        // no construction sites, so the builder switches to miner to be useful
-        creep.PutIntoStorage(_room);
     }
 
     private void RunInMinerMode(ICreep creep) {

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using ScreepsDotNet.API.Bot;
 using ScreepsDotNet.API.World;
@@ -19,7 +18,6 @@ public class WorldBot : IBot {
         // (Since our IVM will reset periodically, this will run frequently enough without us needing to schedule it properly)
         _game.CleanMemory();
     }
-
 
     public void Loop() {
         // Check for any rooms that are no longer visible and remove their manager

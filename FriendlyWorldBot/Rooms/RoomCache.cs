@@ -10,6 +10,7 @@ public class RoomCache {
     private IRoom _room;
     private IList<ISource>? _sources;
     private IList<IStructureSpawn>? _spawns;
+    private IList<IStructureExtension>? _extensions;
 
     public RoomCache(IRoom room) {
         _room = room;
@@ -38,6 +39,19 @@ public class RoomCache {
             }
 
             return _spawns;
+        }
+    }
+    
+    public IList<IStructureExtension> Extensions {
+        get {
+            if (_extensions == null) {
+                _extensions = new List<IStructureExtension>();
+                foreach (var extension in _room.Find<IStructureExtension>()) {
+                    _extensions.Add(extension);
+                }
+            }
+
+            return _extensions;
         }
     }
 

@@ -7,13 +7,14 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 /// Sources and spawns will be cached to the heap for efficiency, so if other jobs need this functionality, use this instance.
 /// </summary>
 public class Miner : IJob {
+    internal const string JobId = "miner";
     private readonly RoomCache _room;
 
     public Miner(RoomCache room) {
         _room = room;
     }
 
-    public string Id => "miner";
+    public string Id => JobId;
     public string Icon => "⛏";
 
     public void Run(ICreep creep) {

@@ -17,6 +17,7 @@ public class Upgrader : IJob
     
     public string Id { get; } = "upgrader";
     public string Icon { get; } = "🗼";
+    public int WantedCreepCount => 2;
     
     public void Run(ICreep creep)
     {

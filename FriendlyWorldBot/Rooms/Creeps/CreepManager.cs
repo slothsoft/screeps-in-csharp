@@ -19,26 +19,22 @@ public class CreepManager : IManager {
     private readonly IDictionary<string, ISet<ICreep>> _creeps;
 
     // TODO: remove these
-    private const int targetMinerCount = 3;
-    private const int targetUpgraderCount = 3;
-    private const int targetBuilderCount = 3;
-
     private static readonly BodyType<BodyPartType> workerBodyType = new([(BodyPartType.Move, 1), (BodyPartType.Carry, 1), (BodyPartType.Work, 1)]);
 
     public CreepManager(IGame game, RoomCache room) {
         _game = game;
         _room = room;
 
-        _jobs = CreateJobMap(room);
+        _jobs = CreateJobMap(game, room);
         _creeps = CreateCreepMap(_jobs.Keys);
     }
 
     // Populate job map - the job instances will live in the heap until the next IVM reset
-    private static IDictionary<string, IJob> CreateJobMap(RoomCache room) {
+    private static IDictionary<string, IJob> CreateJobMap(IGame game, RoomCache room) {
         var result = new List<IJob> {
             new Miner(room),
             new Upgrader(room),
-            new Builder(room)
+            new Builder(game, room)
         };
         return result.ToDictionary(j => j.Id, j => j);
     }
@@ -108,7 +104,7 @@ public class CreepManager : IManager {
         }
 
         foreach (var (jobId, creeps) in _creeps) {
-            if (creeps.Count < targetMinerCount) {
+            if (creeps.Count < _jobs[jobId].WantedCreepCount) {
                 TrySpawnCreep(spawn, workerBodyType, jobId);
                 break;
             }

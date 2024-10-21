@@ -16,6 +16,7 @@ public class Miner : IJob {
 
     public string Id => JobId;
     public string Icon => "⛏";
+    public int WantedCreepCount => 3;
 
     public void Run(ICreep creep) {
         // Check energy storage

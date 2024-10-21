@@ -9,6 +9,6 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 public interface IJob {
     string Id { get; }
     string Icon { get; }
-
+    int WantedCreepCount { get; }
     void Run(ICreep creep);
 }

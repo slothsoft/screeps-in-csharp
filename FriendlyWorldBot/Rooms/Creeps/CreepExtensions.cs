@@ -1,9 +1,8 @@
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using FriendlyWorldBot.Rooms.Structures;
 using FriendlyWorldBot.Utils;
-using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
+using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Rooms.Creeps;
 
@@ -36,7 +35,7 @@ public static class CreepExtensions {
             return findNearest;
         }
         // all else should use other sources than the main for now
-        if (!creep.Room!.Memory.TryGetString(StructureManager.MemoryMainSource, out var mainSourceId)) return null;
+        if (!creep.Room!.Memory.TryGetString(RoomMainSource, out var mainSourceId)) return null;
         return room.Sources
             .Where(s => s.Id != mainSourceId)
             .FindNearest(creep.LocalPosition);

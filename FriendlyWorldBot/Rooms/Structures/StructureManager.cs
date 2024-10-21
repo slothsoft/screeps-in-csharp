@@ -4,14 +4,12 @@ using System.Linq;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
+using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Rooms.Structures;
 
 public class StructureManager : IManager {
 
-    public static string MemoryMain = "main";
-    public static string MemoryMainSource = "mainSource";
-    
     private readonly IGame _game;
     private readonly RoomCache _room;
 
@@ -21,25 +19,62 @@ public class StructureManager : IManager {
 
         var mainSpawn = room.Spawns.First();
         foreach (var spawn in room.Spawns) {
-            spawn.Memory.SetValue(MemoryMain, spawn == mainSpawn);
+            spawn.Memory.SetValue(SpawnMain, spawn == mainSpawn);
         }
         var mainSource = room.Sources.FindNearest(mainSpawn.LocalPosition);
         foreach (var source in room.Sources) {
-            source.Room!.Memory.SetValue(MemoryMainSource, source.Id);
+            source.Room!.Memory.SetValue(RoomMainSource, source.Id);
         }
         Logger.Instance.Info($"set {mainSpawn} as main spawn and {mainSource} as main source");
     }
 
     public void Tick() {
+        BuildExtensions();
+    }
+
+    private bool BuildExtensions() {
         var controller = _room.Room.Controller;
-        if (controller == null) return;
+        if (controller == null) return false;
         var possibleExtensions = GetPossibleExtensionCount(controller.Level);
         var existingExtensions = _room.Extensions.Count;
         var showExtensions = _game.Memory.GetConfigBool("showExtensions");
 
+        var somethingWasBuild = false;
         if (possibleExtensions > existingExtensions || showExtensions) {
-            var positions = CreateExtensionPositions(_room.Spawns, possibleExtensions).ToList();
+            var additionalExtensions = _room.Room.Memory.TryGetInt(RoomAdditionalExtensions, out var ae) ? ae : 0;
+            var positions = CreateExtensionPositions(_room.Spawns, possibleExtensions + additionalExtensions).ToList();
+
+            if (possibleExtensions > existingExtensions) {
+                var minX = positions.Select(p => p.X).Min();
+                var minY = positions.Select(p => p.Y).Min();
+                var maxX = positions.Select(p => p.X).Max();
+                var maxY = positions.Select(p => p.Y).Max();
+
+                // find out if we can place extensions at the points in question or if we need to get additional ones
+                var newAdditionalExtensions = 0;
+                var area = _room.Room.LookAtArea(new Position(minX, minY), new Position(maxX, maxY)).ToList();
+                foreach (var position in positions) {
+                    var stuffAtPosition = area.Where(o => o.LocalPosition == position).ToArray();
+                    var isExtension = stuffAtPosition.Any(s => s is IStructureExtension);
+                    var isExtensionInConstruction = stuffAtPosition.Any(s => s is IConstructionSite cs && cs.IsStructure<IStructureExtension>());
+                    
+                    if (isExtension || isExtensionInConstruction) {
+                        continue;
+                    } 
+                    if (stuffAtPosition.Length > 0) {
+                        // there is another object on this position
+                        newAdditionalExtensions++;
+                        continue;
+                    }
+                    // if the place is empty, just build
+                    _room.Room.CreateConstructionSite<IStructureExtension>(position);
+                    somethingWasBuild = true;
+                }
+                
+                _room.Room.Memory.SetValue(RoomAdditionalExtensions, newAdditionalExtensions);
+            }
             
+            // visualize if necessary
             if (showExtensions) {
                 foreach (var fractionalPosition in positions) {
                     _room.Room.Visual.Circle(fractionalPosition, new CircleVisualStyle(
@@ -49,6 +84,8 @@ public class StructureManager : IManager {
                 }
             }
         }
+
+        return somethingWasBuild;
     }
 
     public static int GetPossibleExtensionCount(int roomLevel) {

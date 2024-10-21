@@ -1,11 +1,17 @@
 namespace FriendlyWorldBot.Utils;
 
 public interface IMemoryConstants {
-    public static string CreepIsBuilding = "isBuilding";
-    public static string CreepTarget = "target";
+    public const string CreepIsBuilding = "isBuilding";
+    public const string CreepTarget = "target";
     
-    public static string RoomBrokenStructures = "brokenStructures";
+    public const string RoomBrokenStructures = "brokenStructures";
+    public const string RoomMainSource = "mainSource";
+    public const string RoomAdditionalExtensions = "additionalExtensions";
     
-    public static string GameRepairAtPercent = "repairAtPercent";
-    public static double GameRepairAtPercentDefault = 0.80;
+    public const string GameRepairStructuresAtPercent = "repairStructuresAtPercent";
+    public const double GameRepairStructuresAtPercentDefault = 0.80;
+    public const string GameRepairWallsAtPercent = "repairWallsAtPercent";
+    public const double GameRepairWallsAtPercentDefault = 0.00001; // should be around 3000
+    
+    public const string SpawnMain = "main";
 }

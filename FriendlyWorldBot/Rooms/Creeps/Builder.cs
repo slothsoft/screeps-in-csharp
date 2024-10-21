@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API.World;
 using static FriendlyWorldBot.Utils.IMemoryConstants;
@@ -44,47 +45,58 @@ public class Builder : IJob {
     }
 
     private void RunInBuilderMode(ICreep creep) {
+        var repairWallsAtPercent = _game.Memory.TryGetDouble(GameRepairWallsAtPercent, out var vw) ? vw : GameRepairWallsAtPercentDefault;
+        
         // if the creep already has a target, repair it until it's finished
         if (creep.Memory.TryGetString(CreepTarget, out var targetId)) {
-            if (RunInRepairMode(creep, targetId)) {
+            if (RunInRepairMode(creep, targetId, repairWallsAtPercent)) {
                 return;
             }
         }
         
-        if (_room.Room.Memory.TryGetString(RoomBrokenStructures, out var brokenStructuresString)) {
+        if (_room.Room.Memory.TryGetString(RoomBrokenStructures, out var brokenStructuresString) && !string.IsNullOrWhiteSpace(brokenStructuresString)) {
             // if the room already has broken structures saved take one of these
             var brokenStructureIds = brokenStructuresString.Split(TargetSeparator).Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
             var brokenStructureId = brokenStructureIds.FirstOrDefault();
             if (brokenStructureId != null) {
                 _room.Room.Memory.SetValue(RoomBrokenStructures, string.Join(TargetSeparator, brokenStructureIds.Where(i => i != brokenStructureId)));
                 creep.Memory.SetValue(CreepTarget, brokenStructureId);
-                if (RunInRepairMode(creep, brokenStructureId))
+                if (RunInRepairMode(creep, brokenStructureId, repairWallsAtPercent))
                 {
                     return;
                 }
             }
         } else {
             // find new broken structures if the room doesn't have a list anymore
-            var repairAtPercent = _game.Memory.TryGetDouble(GameRepairAtPercent, out var value) ? value : GameRepairAtPercentDefault;
-            var brokenStructures = _room.Room.Find<IStructure>().Where(s => s.Hits <= s.HitsMax * repairAtPercent).OrderBy(s => (double)s.Hits / s.HitsMax).ToArray();
+            var repairStructuresAtPercent = _game.Memory.TryGetDouble(GameRepairStructuresAtPercent, out var vs) ? vs : GameRepairStructuresAtPercentDefault;
+            var brokenStructures = _room.Room.Find<IStructure>()
+                .Where(s => s is not IStructureController)
+                .Where(s => s is IStructureWall or IStructureRampart
+                    ? s.Hits <= s.HitsMax * repairWallsAtPercent // walls are repaired only when they are REALLY critical
+                    : s.Hits <= s.HitsMax * repairStructuresAtPercent
+                ).OrderBy(s => s is IStructureWall or IStructureRampart 
+                ? (double) s.Hits / (s.HitsMax * repairWallsAtPercent) //the max for the percentage should be lower
+                : (double) s.Hits / s.HitsMax
+                ).ToArray();
             var bsStrings = string.Join(TargetSeparator, brokenStructures.Skip(1).Select(s => s.Id));
             _room.Room.Memory.SetValue(RoomBrokenStructures, string.Join(TargetSeparator, bsStrings));
             var structure = brokenStructures.FirstOrDefault();
             if (structure != null) {
+                var other = brokenStructures.LastOrDefault();
                 creep.Memory.SetValue(CreepTarget, structure.Id);
-                RunInRepairMode(creep, structure);
+                RunInRepairMode(creep, structure, repairWallsAtPercent);
                 return;
             }
         }
         
         // so if there are no broken structures... build stuff
-        RunInBuildMode(creep);
+        RunInBuildMode(creep, repairWallsAtPercent);
     }
 
-    private bool RunInRepairMode(ICreep creep, string targetId) {
+    private bool RunInRepairMode(ICreep creep, string targetId, double repairWallsAtPercent) {
         var structure = _room.Room.Find<IStructure>().SingleOrDefault(s => s.Id.ToString() == targetId);
         if (structure != null) {
-            RunInRepairMode(creep, structure);
+            RunInRepairMode(creep, structure, repairWallsAtPercent);
             return true;
         } 
         // remove the broken ID
@@ -92,12 +104,13 @@ public class Builder : IJob {
         return false;
     }
 
-    private static void RunInRepairMode(ICreep creep, IStructure target) {
+    private static void RunInRepairMode(ICreep creep, IStructure target, double repairWallsAtPercent) {
         var transferResult = creep.Repair(target);
         if (transferResult == CreepRepairResult.NotInRange) {
             creep.BetterMoveTo(target.RoomPosition);
         } else if (transferResult == CreepRepairResult.Ok) {
-            if (target.Hits >= target.HitsMax) {
+            // we need to block walls from being repaired a lot earlier, since they have 300.000.000 hit points
+            if (target.Hits >= target.HitsMax || (target is IStructureWall && target.Hits >= target.HitsMax * repairWallsAtPercent)) {
                 creep.Memory.SetValue(CreepTarget, string.Empty);
             }
         }else {
@@ -105,7 +118,7 @@ public class Builder : IJob {
         }
     }
 
-    private void RunInBuildMode(ICreep creep) {
+    private void RunInBuildMode(ICreep creep, double repairWallsAtPercent) {
         var constructionSite = creep.Room!.Find<IConstructionSite>().FirstOrDefault();
         if (constructionSite != null) {
             var transferResult = creep.Build(constructionSite);
@@ -115,8 +128,17 @@ public class Builder : IJob {
                 creep.LogInfo($"unexpected result when depositing to {constructionSite} ({transferResult})");
             }
         } else {
-            // no construction sites, so the builder switches to miner to be useful
-            creep.PutIntoStorage(_room);
+            // if there is nothing else to do... top off the walls
+            var wall = _room.Room.Find<IStructure>()
+                .Where(w => w is IStructureWall or IStructureRampart) 
+                .Where(w => w.Hits < w.HitsMax)
+                .MinBy(s => (double)s.Hits / s.HitsMax);
+            if (wall == null) {
+                // no construction sites, no walls, so the builder switches to miner to be useful
+                creep.PutIntoStorage(_room);
+            } else {
+                RunInRepairMode(creep, wall, repairWallsAtPercent);
+            }
         }
     }
 

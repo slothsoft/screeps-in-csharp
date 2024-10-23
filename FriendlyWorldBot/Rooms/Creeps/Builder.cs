@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API.World;
 using static FriendlyWorldBot.Utils.IMemoryConstants;
@@ -22,6 +23,7 @@ public class Builder : IJob {
     public string Id => "builder";
     public string Icon => "🛠";
     public int WantedCreepCount => 3;
+    public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
 
     public void Run(ICreep creep) {
         creep.Memory.TryGetBool(CreepIsBuilding, out var isBuilding);

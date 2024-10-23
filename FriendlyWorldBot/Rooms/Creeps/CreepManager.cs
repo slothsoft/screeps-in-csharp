@@ -10,6 +10,17 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 
 public class CreepManager : IManager {
 
+    private static IDictionary<BodyPartType, int> bodyPartTypeCosts = new Dictionary<BodyPartType, int> {
+        {BodyPartType.Move, 50},
+        {BodyPartType.Work, 100},
+        {BodyPartType.Carry, 50},
+        {BodyPartType.Attack, 80},
+        {BodyPartType.RangedAttack, 150},
+        {BodyPartType.Heal, 250},
+        {BodyPartType.Tough, 10},
+        {BodyPartType.Claim, 600},
+    };
+    
     internal static PolyVisualStyle? PathStyle; 
     private static readonly Random Random = new();
     
@@ -24,7 +35,7 @@ public class CreepManager : IManager {
     public CreepManager(IGame game, RoomCache room) {
         _game = game;
         _room = room;
-
+        
         _jobs = CreateJobMap(game, room);
         _creeps = CreateCreepMap(_jobs.Keys);
     }

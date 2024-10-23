@@ -1,4 +1,5 @@
-﻿using ScreepsDotNet.API.World;
+﻿using System.Collections.Generic;
+using ScreepsDotNet.API.World;
 
 namespace FriendlyWorldBot.Rooms.Creeps;
 
@@ -15,8 +16,9 @@ public class Miner : IJob {
     }
 
     public string Id => JobId;
-    public string Icon => "⛏";
+    public string Icon => "🟡";
     public int WantedCreepCount => 3;
+    public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
 
     public void Run(ICreep creep) {
         // Check energy storage

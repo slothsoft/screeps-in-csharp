@@ -1,4 +1,5 @@
-﻿using FriendlyWorldBot.Utils;
+﻿using System.Collections.Generic;
+using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API.World;
 
 namespace FriendlyWorldBot.Rooms.Creeps;
@@ -17,7 +18,8 @@ public class Upgrader : IJob
     
     public string Id { get; } = "upgrader";
     public string Icon { get; } = "🗼";
-    public int WantedCreepCount => 2;
+    public int WantedCreepCount => 3;
+    public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
     
     public void Run(ICreep creep)
     {

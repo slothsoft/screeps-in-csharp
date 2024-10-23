@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API.World;
 using static FriendlyWorldBot.Utils.IMemoryConstants;

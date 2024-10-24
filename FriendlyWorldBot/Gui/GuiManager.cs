@@ -41,7 +41,7 @@ public class GuiManager : IManager {
         var pointWidth = (double) RoomWidth / menuPoints.Count;
         var currentX = 0.0;
         foreach (var menuPoint in menuPoints) {
-            _room.Room.Visual.Text(menuPoint.Key + ": " + menuPoint.Value,  new FractionalPosition(0, 0.1), MenuBarText);
+            _room.Room.Visual.Text(menuPoint.Key + ": " + menuPoint.Value,  new FractionalPosition(currentX, 0.1), MenuBarText);
             currentX += pointWidth;
         }
 

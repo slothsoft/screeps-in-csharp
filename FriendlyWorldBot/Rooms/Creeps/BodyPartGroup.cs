@@ -5,17 +5,16 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 
 public struct BodyPartGroup {
 
-    public static BodyPartGroup Variable(params BodyPartType[] types) {
+    public static BodyPartGroup Variable(int minCount = 1, int maxCount = 1, params BodyPartType[] types) {
         return new BodyPartGroup(types) {
-            IsVariable = true,
             MaxCount = 3,
         };
     }
     
-    public static BodyPartGroup Fixed(params BodyPartType[] types) {
+    public static BodyPartGroup Fixed(int count = 1, params BodyPartType[] types) {
         return new BodyPartGroup(types) {
-            IsVariable = false,
-            MaxCount = 1,
+            MinCount = count,
+            MaxCount = count,
         };
     }
 
@@ -25,9 +24,8 @@ public struct BodyPartGroup {
         _types = types;
     }
 
-    public bool IsVariable { get; set; } = false;
     public int MinCount { get; set; } = 1;
-    public int MaxCount { get; set; } = 3;
+    public int MaxCount { get; set; } = 1;
     public IReadOnlyCollection<BodyPartType> BodyPartTypes => _types;
 
 

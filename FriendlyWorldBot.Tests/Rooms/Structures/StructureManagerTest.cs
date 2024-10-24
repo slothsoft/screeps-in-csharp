@@ -1,10 +1,11 @@
 using FluentAssertions;
+using FriendlyWorldBot.Rooms.Structures;
 using Moq;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
 using Xunit.Abstractions;
 
-namespace FriendlyWorldBot.Rooms.Structures;
+namespace FriendlyWorldBots.Rsoms.Structures;
 
 public class StructureManagerTest {
     private readonly ITestOutputHelper _testOutputHelper;

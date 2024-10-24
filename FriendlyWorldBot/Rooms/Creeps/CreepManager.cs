@@ -18,9 +18,6 @@ public class CreepManager : IManager {
     private readonly IDictionary<string, IJob> _jobs;
     private readonly IDictionary<string, ISet<ICreep>> _creeps;
 
-    // TODO: remove these
-    private static readonly BodyType<BodyPartType> workerBodyType = new([(BodyPartType.Move, 1), (BodyPartType.Carry, 1), (BodyPartType.Work, 1)]);
-
     public CreepManager(IGame game, RoomCache room) {
         _game = game;
         _room = room;
@@ -113,18 +110,64 @@ public class CreepManager : IManager {
             return;
         }
 
-        foreach (var (jobId, creeps) in _creeps) {
-            if (creeps.Count < _jobs[jobId].WantedCreepCount) {
-                TrySpawnCreep(spawn, workerBodyType, jobId);
+        foreach (var (jobId, creeps) in _creeps)
+        {
+            var  job = _jobs[jobId];
+            if (creeps.Count < _jobs[jobId].WantedCreepCount)
+            {
+                var bodyType = CalculateBodyType(job);
+                if (bodyType != null)
+                {
+                    TrySpawnCreep(spawn, bodyType.Value, jobId);   
+                }
                 break;
             }
         }
     }
 
+    private BodyType<BodyPartType>? CalculateBodyType(IJob job)
+    {
+        // we'll set all body part groups to their max value then decrease until their at their minimum
+        var bodyPartsToCount = job.BodyPartGroups.ToDictionary(g => g, g => g.MaxCount);
+        var costs = CalculateCosts(bodyPartsToCount);
+        while (costs > _room.Room.EnergyAvailable)
+        {
+            var nothingChanged = true;
+            foreach (var bodyPartCount in bodyPartsToCount)
+            {
+                if (bodyPartCount.Value > bodyPartCount.Key.MinCount)
+                {
+                    bodyPartsToCount[bodyPartCount.Key]--;
+                    nothingChanged = false;
+                    break;
+                }
+            }
+
+            costs = CalculateCosts(bodyPartsToCount);
+
+            if (nothingChanged)
+            {
+                // we could not decrease the count any further, so we'll live with it
+                return null;
+            }
+        }
+        return new BodyType<BodyPartType>(
+            bodyPartsToCount.SelectMany(kv => kv.Key.BodyPartTypes.AsEnumerable().SelectMany(p => Enumerable.Repeat(p,kv.Value ))));
+    }
+
+    private int CalculateCosts(Dictionary<BodyPartGroup, int> bodyPartsToCount)
+    {
+        return bodyPartsToCount.Sum(kv => kv.Key.BodyPartTypes.Sum(t => _game.Constants.GetBodyPartCost(t))  * kv.Value);
+    }
+
+    // private static readonly BodyType<BodyPartType> workerBodyType = new([(BodyPartType.Move, 1), (BodyPartType.Carry, 1), (BodyPartType.Work, 1)]);
+        
+        
+
     private void TrySpawnCreep(IStructureSpawn spawn, BodyType<BodyPartType> bodyType, string jobName) {
         var name = FindUniqueCreepName();
         if (spawn.SpawnCreep(bodyType, name, new(dryRun: true)) == SpawnCreepResult.Ok) {
-            Console.WriteLine($"{this}: spawning a {jobName} ({workerBodyType}) from {spawn}...");
+            Console.WriteLine($"{this}: spawning a {jobName} ({bodyType}) from {spawn}...");
             var initialMemory = _game.CreateMemoryObject();
             initialMemory.SetValue("job", jobName);
             spawn.SpawnCreep(bodyType, name, new(dryRun: false, memory: initialMemory));

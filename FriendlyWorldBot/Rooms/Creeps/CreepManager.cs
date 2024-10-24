@@ -10,17 +10,6 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 
 public class CreepManager : IManager {
 
-    private static IDictionary<BodyPartType, int> bodyPartTypeCosts = new Dictionary<BodyPartType, int> {
-        {BodyPartType.Move, 50},
-        {BodyPartType.Work, 100},
-        {BodyPartType.Carry, 50},
-        {BodyPartType.Attack, 80},
-        {BodyPartType.RangedAttack, 150},
-        {BodyPartType.Heal, 250},
-        {BodyPartType.Tough, 10},
-        {BodyPartType.Claim, 600},
-    };
-    
     internal static PolyVisualStyle? PathStyle; 
     private static readonly Random Random = new();
     
@@ -52,6 +41,16 @@ public class CreepManager : IManager {
 
     private static IDictionary<string, ISet<ICreep>> CreateCreepMap(IEnumerable<string> jobIds) {
         return jobIds.ToDictionary(j => j, _ => (ISet<ICreep>) new HashSet<ICreep>());
+    }
+
+    public IEnumerable<string> JobIds => _creeps.Keys;
+
+    public int GetActualCreepCount(string jobId) {
+        return _creeps[jobId].Count;
+    }
+    
+    public IJob GetJob(string jobId) {
+        return _jobs[jobId];
     }
 
     public void Tick() {

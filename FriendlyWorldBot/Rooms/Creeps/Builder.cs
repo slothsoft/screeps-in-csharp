@@ -21,7 +21,7 @@ public class Builder : IJob {
     }
 
     public string Id => "builder";
-    public string Icon => "🛠";
+    public string Icon => "🔨";
     public int WantedCreepCount => 3;
     public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
 

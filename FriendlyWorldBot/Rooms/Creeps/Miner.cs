@@ -16,7 +16,7 @@ public class Miner : IJob {
     }
 
     public string Id => JobId;
-    public string Icon => "🟡";
+    public string Icon => "\u26cf\ufe0f";
     public int WantedCreepCount => 3;
     public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
 

@@ -14,10 +14,11 @@ public class RoomManager : IManager {
 
     public RoomManager(IGame game, IRoom room) {
         _cache = new RoomCache(room);
+        var creepManager = new CreepManager(game, _cache);
         _delegates = [
             new StructureManager(game, _cache),
-            new CreepManager(game, _cache),
-            new GuiManager(game, _cache),
+            creepManager,
+            new GuiManager(game, _cache, creepManager),
         ];
     }
 

@@ -10,6 +10,30 @@ namespace FriendlyWorldBot.Rooms.Structures;
 
 public partial class StructureManager
 {
+    private bool BuildWalls()
+    {
+        return BuildManualWalls() || BuildSpawnWalls() || BuildAutomaticWalls();
+    }
+
+    private bool BuildManualWalls()
+    {
+        // _game.Constants.Controller.GetMaxStructureCount<>()
+        // _room.Room.GetManualBuildConfigPath()
+        return false;
+    }
+    
+    private bool BuildSpawnWalls()
+    {
+        return false;
+    }
+
+
+    private bool BuildAutomaticWalls()
+    {
+        return false;
+    }
+
+
     public static bool IsValidWallPosition(Position pos) {
         var absX = Math.Abs(pos.X);
         var absY = Math.Abs(pos.Y);

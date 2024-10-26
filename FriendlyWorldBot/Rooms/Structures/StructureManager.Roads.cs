@@ -1,15 +1,15 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API;
+using ScreepsDotNet.API.World;
+
 namespace FriendlyWorldBot.Rooms.Structures;
 
 public partial class StructureManager
 {
     private bool BuildRoads()
     {
-        return BuildManualRoads() || BuildAutomaticRoads();
+        return BuildManualRoads() || BuildSpawnRoads() || BuildAutomaticRoads();
     }
 
     private bool BuildManualRoads()
@@ -19,35 +19,54 @@ public partial class StructureManager
         return false;
     }
     
+    private bool BuildSpawnRoads()
+    {
+        // TODO: this will not work for multiple spawns per room
+        var extensions = _room.Room.Find<IStructureExtension>().ToList();
+
+        var minX = extensions.Select(p => p.LocalPosition.X).Min();
+        var minY = extensions.Select(p => p.LocalPosition.Y).Min();
+        var maxX = extensions.Select(p => p.LocalPosition.X).Max();
+        var maxY = extensions.Select(p => p.LocalPosition.Y).Max();
+
+        var roadCount = 0;
+        for (var x = minX; x <= maxX; x++)
+        {
+            for (var y = minY; y <= maxY; y++)
+            {
+                if (IsValidRoadPosition(x, y))
+                {
+                    if (_room.Room.CreateConstructionSite<IStructureExtension>(new Position(x, y)) == RoomCreateConstructionSiteResult.Ok)
+                    {
+                        roadCount++;
+                        if (roadCount > 7) // TODO: magic number
+                        {
+                            return true;
+                        }
+                    }      
+                }
+            }
+        }
+
+        return roadCount > 0;
+    }
+    
+
+    private static bool IsValidRoadPosition(int x, int y) {
+        var absX = Math.Abs(x);
+        var absY = Math.Abs(y);
+        if (absY == 0) {
+            // the horizontal not-road is speckled
+            return absX % 2 == 1;
+        }
+
+        return IsValidExtensionPosition(x, y);
+    }
+
+
     private bool BuildAutomaticRoads()
     {
         return false;
     }
 
-
-    public static bool IsValidRoadPosition(Position pos) {
-        var absX = Math.Abs(pos.X);
-        var absY = Math.Abs(pos.Y);
-        if (absX < 2 && absY < 2) {
-            // to close to the spawn
-            return false;
-        }
-
-        if (absX == absY) {
-            // these are the diagonal lines from the spawn
-            return false;
-        }
-
-        if (absY < 2) {
-            // the wide horizontal road
-            return false;
-        }
-
-        if (absX == 0) {
-            // the vertical road
-            return false;
-        }
-
-        return true;
-    }
 }

@@ -33,7 +33,7 @@ public partial class StructureManager : IManager
     public void Tick()
     {
         if (_game.Time % BuildEveryTicks != 0) return;
-        var somethingWasBuild = BuildExtensions();
+        var somethingWasBuild = BuildExtensions() || BuildRoads() || BuildWalls();
         if (!somethingWasBuild)
         {
             Logger.Instance.Info("Nothing needs to be build.");

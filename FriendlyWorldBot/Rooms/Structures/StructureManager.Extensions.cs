@@ -45,8 +45,11 @@ public partial class StructureManager
                         continue;
                     }
                     // if the place is empty, just build
-                    _room.Room.CreateConstructionSite<IStructureExtension>(position);
-                    somethingWasBuild = true;
+                    if (_room.Room.CreateConstructionSite<IStructureExtension>(position) ==
+                        RoomCreateConstructionSiteResult.Ok)
+                    {
+                        somethingWasBuild = true;
+                    }
                 }
                 
                 _room.Room.Memory.SetValue(RoomAdditionalExtensions, newAdditionalExtensions);
@@ -66,7 +69,7 @@ public partial class StructureManager
         return somethingWasBuild;
     }
 
-    public int GetPossibleExtensionCount(int roomLevel) {
+    private int GetPossibleExtensionCount(int roomLevel) {
         return _game.Constants.Controller.GetMaxStructureCount<IStructureExtension>(roomLevel);
     }
 
@@ -83,11 +86,13 @@ public partial class StructureManager
         return result;
     }
 
-    public static bool IsValidExtensionPosition(Position pos) {
-        var absX = Math.Abs(pos.X);
-        var absY = Math.Abs(pos.Y);
+    public static bool IsValidExtensionPosition(Position pos) => IsValidExtensionPosition(pos.X, pos.Y);
+
+    private static bool IsValidExtensionPosition(int x, int y) {
+        var absX = Math.Abs(x);
+        var absY = Math.Abs(y);
         if (absX < 2 && absY < 2) {
-            // to close to the spawn
+            // too close to the spawn
             return false;
         }
 

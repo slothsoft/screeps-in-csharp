@@ -26,7 +26,7 @@ public static class LoggerExtensions {
     public static void LogInfo(this ICreep creep, string message) => creep.Log(LoggerSeverity.Info, message);
     
     private static void Log(this ICreep creep, LoggerSeverity severity, string message) {
-        if (severity >= Logger.Instance.Severity)
+        if (severity >= Logger.Instance.Severity && creep.Exists)
         {
             creep.Say(severity.GetIcon());
             creep.Memory.SetValue(CreepKeepSaying, 15);

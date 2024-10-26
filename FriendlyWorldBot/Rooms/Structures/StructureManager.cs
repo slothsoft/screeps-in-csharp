@@ -19,10 +19,7 @@ public partial class StructureManager : IManager
         _game = game;
         _room = room;
 
-        var mainSpawn = room.Spawns.First();
-        foreach (var spawn in room.Spawns) {
-            spawn.Memory.SetValue(SpawnMain, spawn == mainSpawn);
-        }
+        var mainSpawn = room.MainSpawn;
         var mainSource = room.Sources.FindNearest(mainSpawn.LocalPosition);
         foreach (var source in room.Sources) {
             source.Room!.Memory.SetValue(RoomMainSource, source.Id);
@@ -33,6 +30,8 @@ public partial class StructureManager : IManager
     public void Tick()
     {
         if (_game.Time % BuildEveryTicks != 0) return;
+        if (_room.Room.Find<IConstructionSite>().Count() >= 7) return; // TODO: magic number
+        
         var somethingWasBuild = BuildExtensions() || BuildRoads() || BuildWalls();
         if (!somethingWasBuild)
         {

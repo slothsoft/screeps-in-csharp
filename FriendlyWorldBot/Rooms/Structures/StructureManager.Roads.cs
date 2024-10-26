@@ -24,6 +24,7 @@ public partial class StructureManager
         // TODO: this will not work for multiple spawns per room
         var extensions = _room.Extensions;
 
+        var spawn = _room.MainSpawn.LocalPosition;
         var minX = extensions.Select(p => p.LocalPosition.X).Min();
         var minY = extensions.Select(p => p.LocalPosition.Y).Min();
         var maxX = extensions.Select(p => p.LocalPosition.X).Max();
@@ -34,9 +35,9 @@ public partial class StructureManager
         {
             for (var y = minY; y <= maxY; y++)
             {
-                if (IsValidRoadPosition(x, y))
+                if (IsValidRoadPosition(x - spawn.X, y - spawn.Y))
                 {
-                    if (_room.Room.CreateConstructionSite<IStructureExtension>(new Position(x, y)) == RoomCreateConstructionSiteResult.Ok)
+                    if (_room.Room.CreateConstructionSite<IStructureRoad>(new Position(x, y)) == RoomCreateConstructionSiteResult.Ok)
                     {
                         roadCount++;
                         if (roadCount > 7) // TODO: magic number
@@ -48,6 +49,7 @@ public partial class StructureManager
             }
         }
 
+        
         return roadCount > 0;
     }
     

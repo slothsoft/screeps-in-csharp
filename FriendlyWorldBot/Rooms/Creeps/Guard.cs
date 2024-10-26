@@ -20,7 +20,7 @@ public class Guard : IJob {
 
     public string Id => "guard";
     public string Icon => "🛡️";
-    public int WantedCreepCount => _room.Ramparts.Count;
+    public int WantedCreepCount => 0; //_room.Ramparts.Count;
     public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
 
     public void Run(ICreep creep)

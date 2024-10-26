@@ -74,6 +74,7 @@ public partial class StructureManager
     }
 
     public static IEnumerable<Position> CreateExtensionPositions(ICollection<IStructureSpawn> spawns, int expectedCount = 10) {
+        // TODO: this works for multiple extensions but maybe it shouldn't
         IEnumerable<Position> result = new List<Position>();
         var expectedPerSpawn = expectedCount / spawns.Count;
         foreach (var spawn in spawns) {

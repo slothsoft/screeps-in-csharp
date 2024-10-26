@@ -10,8 +10,6 @@ using static FriendlyWorldBot.Utils.IMemoryConstants;
 namespace FriendlyWorldBot.Rooms.Creeps;
 
 public class CreepManager : IManager {
-
-    
     internal static PolyVisualStyle? PathStyle; 
     private static readonly Random Random = new();
     
@@ -180,10 +178,6 @@ public class CreepManager : IManager {
         return bodyPartsToCount.Sum(kv => kv.Key.BodyPartTypes.Sum(t => _game.Constants.GetBodyPartCost(t))  * kv.Value);
     }
 
-    // private static readonly BodyType<BodyPartType> workerBodyType = new([(BodyPartType.Move, 1), (BodyPartType.Carry, 1), (BodyPartType.Work, 1)]);
-        
-        
-
     private void TrySpawnCreep(IStructureSpawn spawn, BodyType<BodyPartType> bodyType, string jobName) {
         var name = FindUniqueCreepName();
         if (spawn.SpawnCreep(bodyType, name, new(dryRun: true)) == SpawnCreepResult.Ok) {
@@ -225,9 +219,7 @@ public class CreepManager : IManager {
         return job;
     }
 
-    private string FindUniqueCreepName()
-        => $"{_room.Room.Memory[IMemoryConstants.RoomNameShort]}_{Random.Next()}";
+    private string FindUniqueCreepName() => $"{_room.ShortName}_{Random.Next()}";
 
-    public override string ToString()
-        => $"RoomManager[{_room.Room.Name}]";
+    public override string ToString() => $"RoomManager[{_room.Name}]";
 }

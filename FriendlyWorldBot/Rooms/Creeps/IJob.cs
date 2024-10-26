@@ -15,4 +15,14 @@ public interface IJob {
     int WantedCreepCount { get; }
     IEnumerable<BodyPartGroup> BodyPartGroups { get; }
     void Run(ICreep creep);
+
+    public void OnCreepSpawned(ICreep creep)
+    {
+        // nothing to do on default
+    }
+
+    public void OnCreepDied(ICreep creep)
+    {
+        // nothing to do on default
+    }
 }

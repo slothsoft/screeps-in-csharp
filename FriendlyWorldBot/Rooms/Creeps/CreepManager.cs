@@ -5,11 +5,13 @@ using System.Linq;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
+using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Rooms.Creeps;
 
 public class CreepManager : IManager {
 
+    
     internal static PolyVisualStyle? PathStyle; 
     private static readonly Random Random = new();
     
@@ -31,7 +33,8 @@ public class CreepManager : IManager {
         var result = new List<IJob> {
             new Harvester(room),
             new Upgrader(room),
-            new Builder(game, room)
+            new Builder(game, room),
+            new Guard(game, room),
         };
         return result.ToDictionary(j => j.Id, j => j);
     }
@@ -60,14 +63,14 @@ public class CreepManager : IManager {
         PathStyle = showPaths ? new PolyVisualStyle(Stroke: Color.White) : null;
             
         // Check for any creeps we're tracking that no longer exist
-        foreach (var creepList in _creeps.Values) {
+        foreach (var (jobId, creepList) in _creeps) {
             foreach (var creep in creepList.ToImmutableArray()) {
                 if (creep.Exists) {
                     continue;
                 }
 
                 creepList.Remove(creep);
-                OnCreepDied(creep);
+                OnCreepDied(creep, jobId);
             }
         }
 
@@ -91,6 +94,16 @@ public class CreepManager : IManager {
         // Tick all tracked creeps
         foreach (var creep in _creeps.SelectMany(c => c.Value)) {
             TickCreep(creep);
+            
+            // let a creep saying last a couple of ticks
+            if (creep.Memory.TryGetInt(CreepKeepSaying, out var ticks))
+            {
+                if (ticks > 0 && creep.Saying != null)
+                {
+                    creep.Say(creep.Saying);
+                    creep.Memory.SetValue(CreepKeepSaying, ticks - 1);
+                }   
+            }
         }
     }
 
@@ -98,15 +111,17 @@ public class CreepManager : IManager {
         // Get their job instance and sort them into the correct list
         var job = GetCreepJob(creep);
         if (job == null) {
-            Console.WriteLine($"{this}: {creep} has unknown job!");
+            creep.LogError($"creep has unknown job!");
         } else {
             _creeps[job.Id].Add(creep);
+            job.OnCreepSpawned(creep);
         }
     }
 
-    private void OnCreepDied(ICreep creep) {
+    private void OnCreepDied(ICreep creep, string jobId) {
         // Remove it from all tracking lists
-        Console.WriteLine($"{this}: {creep} died");
+        creep.LogInfo($"{this}: {creep} died");
+        _jobs[jobId].OnCreepDied(creep);
     }
 
     private void TickCreepSpawn(IStructureSpawn spawn) {

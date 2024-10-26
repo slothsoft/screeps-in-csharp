@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using FriendlyWorldBot.Utils;
+using ScreepsDotNet.API.World;
 
 namespace ScreepsDotNet;
 
@@ -33,4 +34,6 @@ public static partial class Program {
             Console.WriteLine(e);
         }
     }
+
+    public static IGame? Game => _game;
 }

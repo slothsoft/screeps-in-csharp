@@ -11,6 +11,7 @@ public class RoomCache {
     private IList<ISource>? _sources;
     private IList<IStructureSpawn>? _spawns;
     private IList<IStructureExtension>? _extensions;
+    private IList<IStructureRampart>? _ramparts;
 
     public RoomCache(IRoom room) {
         _room = room;
@@ -55,6 +56,19 @@ public class RoomCache {
         }
     }
 
+    public IList<IStructureRampart> Ramparts {
+        get {
+            if (_ramparts == null) {
+                _ramparts = new List<IStructureRampart>();
+                foreach (var rampart in _room.Find<IStructureRampart>()) {
+                    _ramparts.Add(rampart);
+                }
+            }
+
+            return _ramparts;
+        }
+    }
+    
     public IRoom Room => _room;
 
     public ISource? FindNearestSource(Position pos) {

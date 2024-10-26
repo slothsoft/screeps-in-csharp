@@ -22,7 +22,7 @@ public partial class StructureManager
     private bool BuildSpawnRoads()
     {
         // TODO: this will not work for multiple spawns per room
-        var extensions = _room.Room.Find<IStructureExtension>().ToList();
+        var extensions = _room.Extensions;
 
         var minX = extensions.Select(p => p.LocalPosition.X).Min();
         var minY = extensions.Select(p => p.LocalPosition.Y).Min();

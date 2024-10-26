@@ -29,7 +29,7 @@ public class CreepManager : IManager {
     // Populate job map - the job instances will live in the heap until the next IVM reset
     private static IDictionary<string, IJob> CreateJobMap(IGame game, RoomCache room) {
         var result = new List<IJob> {
-            new Miner(room),
+            new Harvester(room),
             new Upgrader(room),
             new Builder(game, room)
         };
@@ -44,6 +44,11 @@ public class CreepManager : IManager {
 
     public int GetActualCreepCount(string jobId) {
         return _creeps[jobId].Count;
+    }
+    
+    public int GetWantedCreepCount(IJob job)
+    {
+        return _room.Room.GetWantedCreepsPerJob(job);
     }
     
     public IJob GetJob(string jobId) {
@@ -113,7 +118,7 @@ public class CreepManager : IManager {
         foreach (var (jobId, creeps) in _creeps)
         {
             var  job = _jobs[jobId];
-            if (creeps.Count < _jobs[jobId].WantedCreepCount)
+            if (creeps.Count < GetWantedCreepCount(job))
             {
                 var bodyType = CalculateBodyType(job);
                 if (bodyType != null)

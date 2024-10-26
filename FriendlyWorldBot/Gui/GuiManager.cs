@@ -43,7 +43,11 @@ public class GuiManager : IManager {
         };
         foreach (var jobId in _creepManager.JobIds) {
             var job = _creepManager.GetJob(jobId);
-            menuPoints.Add(job.Icon, _creepManager.GetActualCreepCount(jobId) + Of + job.WantedCreepCount);
+            var wantedCreepCount = _creepManager.GetWantedCreepCount(job);
+            if (wantedCreepCount > 0)
+            {
+                menuPoints.Add(job.Icon, _creepManager.GetActualCreepCount(jobId) + Of + wantedCreepCount);
+            }
         }
 
         var pointWidth = Math.Min((double)RoomWidth / menuPoints.Count, MenuPointMaxWidth);

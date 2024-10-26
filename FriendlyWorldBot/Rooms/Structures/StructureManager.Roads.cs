@@ -60,7 +60,7 @@ public partial class StructureManager
             return absX % 2 == 1;
         }
 
-        return IsValidExtensionPosition(x, y);
+        return !IsValidExtensionPosition(x, y);
     }
 
 

@@ -7,7 +7,7 @@ using static FriendlyWorldBot.Utils.IMemoryConstants;
 namespace FriendlyWorldBot.Rooms.Creeps;
 
 /// <summary>
-/// Builder will try to repair buildings or build new ones. If both are not present, they will act like a miner.
+/// Builder will try to repair buildings or build new ones. If both are not present, they will act like a harvester.
 /// </summary>
 public class Builder : IJob {
     private const string TargetSeparator = ",";
@@ -34,13 +34,13 @@ public class Builder : IJob {
             RunInBuilderMode(creep);
 
             if (creep.Store.GetUsedCapacity(ResourceType.Energy) == 0) {
-                // we cannot build any longer, so switch to miner mode
+                // we cannot build any longer, so switch to harvester mode
                 creep.Memory.SetValue(CreepIsBuilding, false);
             }
         } else
         {
             creep.Memory.SetValue(CreepTempTarget, string.Empty);
-            RunInMinerMode(creep);
+            RunInHarvesterMode(creep);
 
             if (creep.Store.GetFreeCapacity(ResourceType.Energy) == 0) {
                 // we cannot mine any longer, so switch to builder mode
@@ -146,7 +146,7 @@ public class Builder : IJob {
                 .Where(w => w.Hits < w.HitsMax)
                 .MinBy(s => (double)s.Hits / s.HitsMax);
             if (wall == null) {
-                // no construction sites, no walls, so the builder switches to miner to be useful
+                // no construction sites, no walls, so the builder switches to harvester to be useful
                 creep.PutIntoStorage(_room);
             } else {
                 creep.Memory.SetValue(CreepTempTarget, wall.Id);
@@ -155,7 +155,7 @@ public class Builder : IJob {
         }
     }
 
-    private void RunInMinerMode(ICreep creep) {
+    private void RunInHarvesterMode(ICreep creep) {
         creep.MineResource(_room);
     }
 }

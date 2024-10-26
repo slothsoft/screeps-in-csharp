@@ -27,8 +27,8 @@ public static class CreepExtensions {
         if (findNearest == null) {
             return null;
         }
-        if (creep.IsMiner()) {
-            // miners are allowed to use the closest source, no matter if main or not
+        if (creep.IsHarvester()) {
+            // harvesters are allowed to use the closest source, no matter if main or not
             return findNearest;
         }
         if (room.Sources.Count < 1) {
@@ -71,8 +71,8 @@ public static class CreepExtensions {
         }
     }
 
-    internal static bool IsMiner(this ICreep creep) {
-        return creep.GetJobId() == Miner.JobId;
+    internal static bool IsHarvester(this ICreep creep) {
+        return creep.GetJobId() == Harvester.JobId;
     }
 
     internal static string? GetJobId(this ICreep creep) {

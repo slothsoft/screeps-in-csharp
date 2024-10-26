@@ -1,5 +1,6 @@
 using System;
 using FriendlyWorldBot.Paths;
+using FriendlyWorldBot.Rooms.Creeps;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
 
@@ -75,5 +76,9 @@ public static class MemoryUtil {
 
     public static IPath GetManualBuildConfigPath(this IRoom room, string id) {
         return room.Memory.GetConfigObj().GetOrCreateObject("manualBuild").TryGetString(id, out var path) ? EmptyPath.Instance :  path!.Pathify();
+    }
+    
+    public static int GetWantedCreepsPerJob(this IRoom room, IJob job) {
+        return room.Memory.GetConfigObj().GetOrCreateObject("wantedCreepsPerJob").TryGetInt(job.Id, out var result) ? result : job.WantedCreepCount;
     }
 }

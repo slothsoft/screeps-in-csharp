@@ -1,22 +1,22 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ScreepsDotNet.API.World;
 
 namespace FriendlyWorldBot.Rooms.Creeps;
 
 /// <summary>
-/// The miner job will instruct creeps to harvest the nearest source until they're full, then return to the nearest spawn and deposit energy.
+/// The harvester job will instruct creeps to harvest the nearest source until they're full, then return to the nearest spawn and deposit energy.
 /// Sources and spawns will be cached to the heap for efficiency, so if other jobs need this functionality, use this instance.
 /// </summary>
-public class Miner : IJob {
-    internal const string JobId = "miner";
+public class Harvester : IJob {
+    internal const string JobId = "harvester";
     private readonly RoomCache _room;
 
-    public Miner(RoomCache room) {
+    public Harvester(RoomCache room) {
         _room = room;
     }
 
     public string Id => JobId;
-    public string Icon => "\u26cf\ufe0f";
+    public string Icon => "🧺";
     public int WantedCreepCount => 3;
     public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
 

@@ -12,6 +12,7 @@ public interface IMemoryConstants {
     public const string RoomAdditionalExtensions = "additionalExtensions";
     public const string RoomName = "name";
     public const string RoomNameShort = "nameShort";
+    public const string RoomCreatedRoadsForLevel = "createdRoadsForLevel";
     
     public const string GameRepairStructuresAtPercent = "repairStructuresAtPercent";
     public const double GameRepairStructuresAtPercentDefault = 0.80;

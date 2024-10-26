@@ -12,7 +12,7 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 public class Builder : IJob {
     private const string TargetSeparator = ",";
      
-    // ???: maybe separate builder from maintainer and self-destruct builder when not needed
+    // TODO: maybe separate builder from maintainer and self-destruct builder when not needed
     
     private readonly IGame _game;
     private readonly RoomCache _room;

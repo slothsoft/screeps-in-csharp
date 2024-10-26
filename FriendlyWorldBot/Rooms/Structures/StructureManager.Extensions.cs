@@ -20,7 +20,7 @@ public partial class StructureManager
         var somethingWasBuild = false;
         if (possibleExtensions > existingExtensions || showExtensions) {
             var additionalExtensions = _room.Room.Memory.TryGetInt(RoomAdditionalExtensions, out var ae) ? ae : 0;
-            var positions = CreateExtensionPositions(_room.Spawns, possibleExtensions + additionalExtensions).ToList();
+            var positions = CreateExtensionPositions(_room.SpawnsForExtensionConstruction.ToArray(), possibleExtensions + additionalExtensions).ToList();
 
             if (possibleExtensions > existingExtensions) {
                 var minX = positions.Select(p => p.X).Min();
@@ -74,7 +74,6 @@ public partial class StructureManager
     }
 
     public static IEnumerable<Position> CreateExtensionPositions(ICollection<IStructureSpawn> spawns, int expectedCount = 10) {
-        // TODO: this works for multiple extensions but maybe it shouldn't
         IEnumerable<Position> result = new List<Position>();
         var expectedPerSpawn = expectedCount / spawns.Count;
         foreach (var spawn in spawns) {

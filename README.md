@@ -27,9 +27,7 @@ dotnet publish -c Release
 
 # To Dos
 
-- add screeps types to brand-new menu bar
 - create log levels so that the log is not always sooo full of stuff
-- make it possible to create stronger creeps
 - `Builder` to dos
 
 # Links

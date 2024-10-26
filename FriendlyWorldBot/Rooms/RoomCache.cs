@@ -48,6 +48,12 @@ public class RoomCache {
         }
     }
 
+    public IEnumerable<IStructureSpawn> SpawnsForExtensionConstruction {
+        get {
+            yield return MainSpawn;
+        }
+    }
+
     public IStructureSpawn MainSpawn {
         get {
             var mainSpawn = Spawns.SingleOrDefault(s => s.Memory.TryGetBool(SpawnMain, out var spawnMain) && spawnMain);

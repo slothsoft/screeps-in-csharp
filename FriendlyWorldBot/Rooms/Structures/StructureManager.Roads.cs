@@ -1,14 +1,14 @@
 using System;
 using System.Linq;
+using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
+using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Rooms.Structures;
 
-public partial class StructureManager
-{
-    private bool BuildRoads()
-    {
+public partial class StructureManager {
+    private bool BuildRoads() {
         return BuildManualRoads() || BuildSpawnRoads() || BuildAutomaticRoads();
     }
 
@@ -18,42 +18,43 @@ public partial class StructureManager
         // _room.Room.GetManualBuildConfigPath()
         return false;
     }
-    
-    private bool BuildSpawnRoads()
-    {
-        // TODO: this will not work for multiple spawns per room
-        var extensions = _room.Extensions;
 
-        var spawn = _room.MainSpawn.LocalPosition;
-        var minX = extensions.Select(p => p.LocalPosition.X).Min();
-        var minY = extensions.Select(p => p.LocalPosition.Y).Min();
-        var maxX = extensions.Select(p => p.LocalPosition.X).Max();
-        var maxY = extensions.Select(p => p.LocalPosition.Y).Max();
-
+    private bool BuildSpawnRoads() {
+        var createdRoomsForLevel = _room.Room.Memory.TryGetInt(RoomCreatedRoadsForLevel, out var l) ? l : 0;
+        var controllerLevel = _room.Room.Controller!.Level;
+        if (createdRoomsForLevel >= controllerLevel) return false;
+        
         var roadCount = 0;
-        for (var x = minX; x <= maxX; x++)
-        {
-            for (var y = minY; y <= maxY; y++)
-            {
-                if (IsValidRoadPosition(x - spawn.X, y - spawn.Y))
-                {
-                    if (_room.Room.CreateConstructionSite<IStructureRoad>(new Position(x, y)) == RoomCreateConstructionSiteResult.Ok)
-                    {
-                        roadCount++;
-                        if (roadCount > 7) // TODO: magic number
-                        {
-                            return true;
+        var maxExtensions = _game.Constants.Controller.GetMaxStructureCount<IStructureExtension>(controllerLevel);
+        var additionalExtensions = _room.Room.Memory.TryGetInt(RoomAdditionalExtensions, out var ae) ? ae : 0;
+        var maxSpawnPositions =  (maxExtensions + additionalExtensions).ToUlamSpiral().ToArray();
+        
+        var minX = maxSpawnPositions.Select(p => p.X).Min();
+        var minY = maxSpawnPositions.Select(p => p.Y).Min();
+        var maxX = maxSpawnPositions.Select(p => p.X).Max();
+        var maxY = maxSpawnPositions.Select(p => p.Y).Max();
+
+        foreach (var spawn in _room.SpawnsForExtensionConstruction) {
+            var spawnPosition = spawn.LocalPosition;
+
+            for (var x = minX; x <= maxX; x++) {
+                for (var y = minY; y <= maxY; y++) {
+                    if (IsValidRoadPosition(x - spawnPosition.X, y - spawnPosition.Y)) {
+                        if (_room.Room.CreateConstructionSite<IStructureRoad>(new Position(x, y)) == RoomCreateConstructionSiteResult.Ok) {
+                            roadCount++;
+                            if (roadCount >= MaxConstructionSites) {
+                                return true;
+                            }
                         }
-                    }      
+                    }
                 }
             }
         }
-
         
+        _room.Room.Memory.SetValue(RoomCreatedRoadsForLevel, controllerLevel);
         return roadCount > 0;
     }
     
-
     private static bool IsValidRoadPosition(int x, int y) {
         var absX = Math.Abs(x);
         var absY = Math.Abs(y);
@@ -65,10 +66,8 @@ public partial class StructureManager
         return !IsValidExtensionPosition(x, y);
     }
 
-
     private bool BuildAutomaticRoads()
     {
         return false;
     }
-
 }

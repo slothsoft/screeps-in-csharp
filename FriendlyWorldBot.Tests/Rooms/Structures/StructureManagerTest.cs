@@ -66,7 +66,7 @@ public class StructureManagerTest {
     [InlineData(-2, -4, true)]
     [InlineData(2, -4, true)]
     public void IsValidPosition(int x, int y, bool expected) {
-        var actual = StructureManager.IsValidPosition(new Position(x, y));
+        var actual = StructureManager.IsValidExtensionPosition(new Position(x, y));
         actual.Should().Be(expected);
     }
 
@@ -79,19 +79,5 @@ public class StructureManagerTest {
         var actual = StructureManager.CreateExtensionPositions([ spawn.Object ], number).ToList();
         actual.Should().HaveCountGreaterOrEqualTo(number);
         actual.Should().Contain(new Position(2, 5));
-    }
-
-    [Theory]
-    [InlineData(0, 0)]
-    [InlineData(1, 5)]
-    [InlineData(2, 10)]
-    [InlineData(3, 20)]
-    [InlineData(4, 30)]
-    [InlineData(5, 40)]
-    [InlineData(6, 50)]
-    [InlineData(7, 60)]
-    public void GetPossibleExtensionCount(int level, int expected) {
-        var actual = StructureManager.GetPossibleExtensionCount(level);
-        actual.Should().Be(expected);
     }
 }

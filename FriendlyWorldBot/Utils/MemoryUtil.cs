@@ -1,4 +1,5 @@
 using System;
+using FriendlyWorldBot.Paths;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
 
@@ -64,7 +65,15 @@ public static class MemoryUtil {
         }
     }
 
-    public static bool GetConfigBool(this IMemoryObject memory, string id) {
-        return memory.GetOrCreateObject("config").TryGetBool(id, out var result) && result;
+    public static bool GetConfigBool(this IGame game, string id) {
+        return game.Memory.GetConfigObj().TryGetBool(id, out var result) && result;
+    }
+    
+    private static IMemoryObject GetConfigObj(this IMemoryObject memory) {
+        return memory.GetOrCreateObject("config");
+    }
+
+    public static IPath GetManualBuildConfigPath(this IRoom room, string id) {
+        return room.Memory.GetConfigObj().GetOrCreateObject("manualBuild").TryGetString(id, out var path) ? EmptyPath.Instance :  path!.Pathify();
     }
 }

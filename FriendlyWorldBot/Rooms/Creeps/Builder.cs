@@ -11,6 +11,9 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 /// </summary>
 public class Builder : IJob {
     private const string TargetSeparator = ",";
+     
+    // XXX: when they have nothing else to do, they ping-pong between the two lowest hit point walls
+    // ???: maybe separate builder from maintainer and self-destruct builder when not needed
     
     private readonly IGame _game;
     private readonly RoomCache _room;

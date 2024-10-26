@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ScreepsDotNet.API;
+using static FriendlyWorldBot.Paths.PathExtensions;
 
 namespace FriendlyWorldBot.Paths;
 
-public record Line(int startX, int startY, int endX, int endY) : IPath {
+public record Line(int StartX, int StartY, int EndX, int EndY) : IPath {
 
-    private const string SeparatorTo = "-";
-    private const string SeparatorXy = ",";
+    internal const string SeparatorTo = "-";
     
     public static Line Pathify(string someString) {
         var startEnd = someString.Split(SeparatorTo);
@@ -18,18 +18,18 @@ public record Line(int startX, int startY, int endX, int endY) : IPath {
     }
     
     public string Stringify() {
-        return $"{startX}{SeparatorXy}{startY}{SeparatorTo}{endX}{SeparatorXy}{endY}";
+        return $"{StartX}{SeparatorXy}{StartY}{SeparatorTo}{EndX}{SeparatorXy}{EndY}";
     }
 
     public IEnumerable<Position> ToPositions() {
-        var xDiff = endX - startX;
-        var yDiff = endY - startY;
+        var xDiff = EndX - StartX;
+        var yDiff = EndY - StartY;
         var biggerDiff = Math.Max(xDiff, yDiff);
         var stepX = (double) xDiff / biggerDiff;
         var stepY = (double) yDiff / biggerDiff;
         
         for (var i = 0; i <= biggerDiff; i++) {
-            yield return new Position((int) Math.Round(startX + stepX * i), (int) Math.Round(startY + stepY * i));
+            yield return new Position((int) Math.Round(StartX + stepX * i), (int) Math.Round(StartY + stepY * i));
         }
     }
 }

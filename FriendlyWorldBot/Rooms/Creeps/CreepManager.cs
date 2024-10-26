@@ -51,7 +51,7 @@ public class CreepManager : IManager {
     }
 
     public void Tick() {
-        var showPaths = _game.Memory.GetConfigBool("showPaths");
+        var showPaths = _game.GetConfigBool("showPaths");
         PathStyle = showPaths ? new PolyVisualStyle(Stroke: Color.White) : null;
             
         // Check for any creeps we're tracking that no longer exist
@@ -181,7 +181,7 @@ public class CreepManager : IManager {
             return;
         }
 
-        if (_game.Memory.GetConfigBool("showJobs")) {
+        if (_game.GetConfigBool("showJobs")) {
             creep.Say(job.Icon);
         }
 

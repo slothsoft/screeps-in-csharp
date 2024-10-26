@@ -1,7 +1,10 @@
-﻿using FriendlyWorldBot.Gui;
+﻿using System;
+using System.Linq;
+using FriendlyWorldBot.Gui;
 using FriendlyWorldBot.Rooms.Creeps;
 using FriendlyWorldBot.Rooms.Structures;
 using ScreepsDotNet.API.World;
+using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Rooms;
 
@@ -14,6 +17,15 @@ public class RoomManager : IManager {
 
     public RoomManager(IGame game, IRoom room) {
         _cache = new RoomCache(room);
+
+        if (!room.Memory.TryGetString(RoomName, out _))
+        {
+            var spawnName = _cache.Spawns.FirstOrDefault()?.Name ?? string.Empty;
+            var spawnNameShort = spawnName.Length > 0 ? spawnName[..1] : string.Empty;
+            room.Memory.SetValue(RoomName, spawnName);
+            room.Memory.SetValue(RoomNameShort, spawnNameShort);
+        }
+        
         var creepManager = new CreepManager(game, _cache);
         _delegates = [
             new StructureManager(game, _cache),

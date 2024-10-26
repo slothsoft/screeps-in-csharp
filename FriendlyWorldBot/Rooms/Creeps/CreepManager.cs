@@ -226,7 +226,7 @@ public class CreepManager : IManager {
     }
 
     private string FindUniqueCreepName()
-        => $"{_room.Room.Name}_{Random.Next()}";
+        => $"{_room.Room.Memory[IMemoryConstants.RoomNameShort]}_{Random.Next()}";
 
     public override string ToString()
         => $"RoomManager[{_room.Room.Name}]";

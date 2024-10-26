@@ -10,6 +10,8 @@ public interface IMemoryConstants {
     public const string RoomBrokenStructures = "brokenStructures";
     public const string RoomMainSource = "mainSource";
     public const string RoomAdditionalExtensions = "additionalExtensions";
+    public const string RoomName = "name";
+    public const string RoomNameShort = "nameShort";
     
     public const string GameRepairStructuresAtPercent = "repairStructuresAtPercent";
     public const double GameRepairStructuresAtPercentDefault = 0.80;

@@ -12,7 +12,6 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 public class Builder : IJob {
     private const string TargetSeparator = ",";
      
-    // XXX: when they have nothing else to do, they ping-pong between the two lowest hit point walls
     // ???: maybe separate builder from maintainer and self-destruct builder when not needed
     
     private readonly IGame _game;
@@ -38,7 +37,9 @@ public class Builder : IJob {
                 // we cannot build any longer, so switch to miner mode
                 creep.Memory.SetValue(CreepIsBuilding, false);
             }
-        } else {
+        } else
+        {
+            creep.Memory.SetValue(CreepTempTarget, string.Empty);
             RunInMinerMode(creep);
 
             if (creep.Store.GetFreeCapacity(ResourceType.Energy) == 0) {
@@ -52,8 +53,15 @@ public class Builder : IJob {
         var repairWallsAtPercent = _game.Memory.TryGetDouble(GameRepairWallsAtPercent, out var vw) ? vw : GameRepairWallsAtPercentDefault;
         
         // if the creep already has a target, repair it until it's finished
-        if (creep.Memory.TryGetString(CreepTarget, out var targetId)) {
+        if (creep.Memory.TryGetString(CreepTarget, out var targetId) && !string.IsNullOrEmpty(targetId)) {
             if (RunInRepairMode(creep, targetId, repairWallsAtPercent)) {
+                return;
+            }
+        }
+        
+        // walls are a temp target that resets when the creep has no energy anymore
+        if (creep.Memory.TryGetString(CreepTempTarget, out var tempTargetId) && !string.IsNullOrEmpty(tempTargetId)) {
+            if (RunInRepairMode(creep, tempTargetId, repairWallsAtPercent)) {
                 return;
             }
         }
@@ -141,6 +149,7 @@ public class Builder : IJob {
                 // no construction sites, no walls, so the builder switches to miner to be useful
                 creep.PutIntoStorage(_room);
             } else {
+                creep.Memory.SetValue(CreepTempTarget, wall.Id);
                 RunInRepairMode(creep, wall, repairWallsAtPercent);
             }
         }

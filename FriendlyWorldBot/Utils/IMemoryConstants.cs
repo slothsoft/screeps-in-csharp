@@ -3,6 +3,7 @@ namespace FriendlyWorldBot.Utils;
 public interface IMemoryConstants {
     public const string CreepIsBuilding = "isBuilding";
     public const string CreepTarget = "target";
+    public const string CreepTempTarget = "tempTarget";
     
     public const string RoomBrokenStructures = "brokenStructures";
     public const string RoomMainSource = "mainSource";

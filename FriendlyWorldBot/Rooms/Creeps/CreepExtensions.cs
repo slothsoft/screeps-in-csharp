@@ -8,17 +8,17 @@ using static FriendlyWorldBot.Utils.IMemoryConstants;
 namespace FriendlyWorldBot.Rooms.Creeps;
 
 public static class CreepExtensions {
-    internal static void MineResource(this ICreep creep, RoomCache room) {
+    internal static void HarvestResource(this ICreep creep, RoomCache room) {
         var source = creep.FindAssignedResource(room);
         if (source == null) {
             return;
         }
 
-        var mineResult = creep.Harvest(source);
-        if (mineResult == CreepHarvestResult.NotInRange) {
+        var harvestResult = creep.Harvest(source);
+        if (harvestResult == CreepHarvestResult.NotInRange) {
             creep.BetterMoveTo(source.RoomPosition);
-        } else if (mineResult != CreepHarvestResult.Ok) {
-            creep.LogInfo($"unexpected result when harvesting {source} ({mineResult})");
+        } else if (harvestResult != CreepHarvestResult.Ok) {
+            creep.LogInfo($"unexpected result when harvesting {source} ({harvestResult})");
         }
     }
 

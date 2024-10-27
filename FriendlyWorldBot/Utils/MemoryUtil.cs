@@ -3,6 +3,7 @@ using FriendlyWorldBot.Paths;
 using FriendlyWorldBot.Rooms.Creeps;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
+using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Utils;
 
@@ -80,5 +81,20 @@ public static class MemoryUtil {
     
     public static int GetWantedCreepsPerJob(this IRoom room, IJob job) {
         return room.Memory.GetConfigObj().GetOrCreateObject("wantedCreepsPerJob").TryGetInt(job.Id, out var result) ? result : job.WantedCreepCount;
+    }
+
+    public static void IncrementKillCount(this IMemoryObject memory, string id) {
+        var killCount = GetKillCount(memory);
+        killCount.ChangeIntValue(id, n => n + 1);
+        killCount.ChangeIntValue(TotalEnemiesKilled, n => n + 1);
+    }
+    
+    public static void ChangeIntValue(this IMemoryObject memory, string id, Func<int, int> change) {
+        var currentValue = memory.TryGetInt(id, out var idKillCount) ? idKillCount : 0;
+        memory.SetValue(id, change(currentValue));
+    }
+
+    private static IMemoryObject GetKillCount(this IMemoryObject memory) {
+        return memory.GetConfigObj().GetOrCreateObject("killCount");
     }
 }

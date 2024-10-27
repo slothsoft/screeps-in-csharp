@@ -94,7 +94,6 @@ public class Builder : IJob {
             _room.Room.Memory.SetValue(RoomBrokenStructures, string.Join(TargetSeparator, bsStrings));
             var structure = brokenStructures.FirstOrDefault();
             if (structure != null) {
-                var other = brokenStructures.LastOrDefault();
                 creep.Memory.SetValue(CreepTarget, structure.Id);
                 RunInRepairMode(creep, structure, repairWallsAtPercent);
                 return;
@@ -156,6 +155,6 @@ public class Builder : IJob {
     }
 
     private void RunInHarvesterMode(ICreep creep) {
-        creep.MineResource(_room);
+        creep.HarvestResource(_room);
     }
 }

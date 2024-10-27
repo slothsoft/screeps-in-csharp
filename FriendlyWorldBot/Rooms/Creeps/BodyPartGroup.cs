@@ -7,7 +7,8 @@ public struct BodyPartGroup {
 
     public static BodyPartGroup Variable(int minCount = 1, int maxCount = 1, params BodyPartType[] types) {
         return new BodyPartGroup(types) {
-            MaxCount = 3,
+            MinCount = minCount,
+            MaxCount = maxCount,
         };
     }
     

@@ -23,7 +23,7 @@ public class Miner : IJob {
     public void Run(ICreep creep) {
         // Check energy storage
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
-            creep.MineResource(_room);
+            creep.HarvestResource(_room);
         } else {
             creep.PutIntoStorage(_room);
         }

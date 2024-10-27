@@ -24,7 +24,7 @@ public partial class StructureManager : IManager
         }
         Logger.Instance.Info($"set {mainSpawn} as main spawn and {mainSource} as main source");
     }
-
+    
     public void Tick()
     {
         if (_game.Time % BuildEveryTicks != 0) return;

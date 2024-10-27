@@ -19,10 +19,9 @@ dotnetmklink /J ...\screeps-in-csharp\FriendlyWorldBot\bin\Debug\net8.0\wasi-was
 To publish it in a way that can be copied to the Screeps folder:
 
 ```powershell
-dotnet clean
-dotnet publish -c Debug
+dotnet dotnet clean | dotnet publish -c Debug
 OR
-dotnet publish -c Release
+dotnet dotnet clean | dotnet publish -c Release
 ```
 
 # To Dos

@@ -41,7 +41,7 @@ public class Upgrader : IJob
             // We're empty - go to pick up
             var spawn = _room.FindNearestSpawn(creep.LocalPosition);
             if (spawn == null || spawn.Store.GetUsedCapacity() < 10) { // TODO: magic number
-                creep.MineResource(_room);
+                creep.HarvestResource(_room);
                 return; 
             }
             var withdrawResult = creep.Withdraw(spawn, ResourceType.Energy);

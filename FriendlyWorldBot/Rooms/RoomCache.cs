@@ -50,15 +50,18 @@ public class RoomCache {
 
     public IEnumerable<IStructureSpawn> SpawnsForExtensionConstruction {
         get {
-            yield return MainSpawn;
+            var mainSpawn = MainSpawn;
+            if (mainSpawn != null) {
+                yield return mainSpawn;
+            }
         }
     }
 
-    public IStructureSpawn MainSpawn {
+    public IStructureSpawn? MainSpawn {
         get {
             var mainSpawn = Spawns.SingleOrDefault(s => s.Memory.TryGetBool(SpawnMain, out var spawnMain) && spawnMain);
             if (mainSpawn == null) {
-                mainSpawn = Spawns.First();
+                mainSpawn = Spawns.FirstOrDefault();
                 foreach (var spawn in Spawns) {
                     spawn.Memory.SetValue(SpawnMain, spawn == mainSpawn);
                 }

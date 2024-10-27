@@ -28,6 +28,10 @@ public partial class StructureManager {
         var maxExtensions = _game.Constants.Controller.GetMaxStructureCount<IStructureExtension>(controllerLevel);
         var additionalExtensions = _room.Room.Memory.TryGetInt(RoomAdditionalExtensions, out var ae) ? ae : 0;
         var maxSpawnPositions =  (maxExtensions + additionalExtensions).ToUlamSpiral().ToArray();
+
+        if (maxSpawnPositions.Length == 0) {
+            return false; // there is no spawn yet, so we cannot build anything
+        }
         
         var minX = maxSpawnPositions.Select(p => p.X).Min();
         var minY = maxSpawnPositions.Select(p => p.Y).Min();

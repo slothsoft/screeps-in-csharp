@@ -17,6 +17,7 @@ public interface IJob {
     string Icon { get; }
     int WantedCreepCount { get; }
     IEnumerable<BodyPartGroup> BodyPartGroups { get; }
+    int Priority { get; }
     void Run(ICreep creep);
 
     public void OnCreepSpawned(ICreep creep)

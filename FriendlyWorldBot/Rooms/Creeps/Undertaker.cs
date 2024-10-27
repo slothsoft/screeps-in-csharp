@@ -26,6 +26,7 @@ public class Undertaker : IJob {
     public string Icon => "\ud83e\udea6";
     public int WantedCreepCount => _creepManager.GetAllCreeps().Count() >= 9 && !_creepManager.GetCreeps(Guard.JobId).Any() ? 1 : 0; // TODO magic number
     public IEnumerable<BodyPartGroup> BodyPartGroups => UndertakerBodyPartGroups;
+    public int Priority => 200;
 
     public void Run(ICreep creep) {
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {

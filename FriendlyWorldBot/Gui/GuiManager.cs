@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FriendlyWorldBot.Rooms;
 using FriendlyWorldBot.Rooms.Creeps;
 using ScreepsDotNet.API;
@@ -38,15 +39,15 @@ public class GuiManager : IManager {
         var menuBarLineY = menuBarHalfHeight - (1.5 * MenuBarLine.Width ?? 0.1);
         _room.Room.Visual.Line(new FractionalPosition(-0.5, menuBarLineY), new FractionalPosition(RoomWidth, menuBarLineY), MenuBarLine);
 
-        var menuPoints = new Dictionary<string, string> {
-            {EnergyShort, _room.Room.EnergyAvailable + Of + _room.Room.EnergyCapacityAvailable}
+        var menuPoints = new List<KeyValuePair<string, string>> {
+            new(EnergyShort, _room.Room.EnergyAvailable + Of + _room.Room.EnergyCapacityAvailable)
         };
-        foreach (var jobId in _creepManager.JobIds) {
+        foreach (var jobId in _creepManager.JobIds.OrderBy(jobId => _creepManager.GetJob(jobId).Priority)) {
             var job = _creepManager.GetJob(jobId);
             var wantedCreepCount = _creepManager.GetWantedCreepCount(job);
             if (wantedCreepCount > 0)
             {
-                menuPoints.Add(job.Icon, _creepManager.GetActualCreepCount(jobId) + Of + wantedCreepCount);
+                menuPoints.Add(new KeyValuePair<string, string>(job.Icon, _creepManager.GetActualCreepCount(jobId) + Of + wantedCreepCount));
             }
         }
 

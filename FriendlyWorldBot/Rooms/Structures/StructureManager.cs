@@ -18,11 +18,13 @@ public partial class StructureManager : IManager
         _room = room;
 
         var mainSpawn = room.MainSpawn;
-        var mainSource = room.Sources.FindNearest(mainSpawn.LocalPosition);
-        foreach (var source in room.Sources) {
-            source.Room!.Memory.SetValue(RoomMainSource, source.Id);
+        if (mainSpawn != null) {
+            var mainSource = room.Sources.FindNearest(mainSpawn.LocalPosition);
+            foreach (var source in room.Sources) {
+                source.Room!.Memory.SetValue(RoomMainSource, source.Id);
+            }
+            Logger.Instance.Info($"set {mainSpawn} as main spawn and {mainSource} as main source");
         }
-        Logger.Instance.Info($"set {mainSpawn} as main spawn and {mainSource} as main source");
     }
     
     public void Tick()

@@ -28,6 +28,7 @@ dotnet dotnet clean | dotnet publish -c Release
 
 - create log levels so that the log is not always sooo full of stuff
 - `Builder` to dos
+- undertaker should put into own storage first
 
 # Links
 

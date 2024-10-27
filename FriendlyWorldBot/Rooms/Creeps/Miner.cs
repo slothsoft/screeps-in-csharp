@@ -19,7 +19,8 @@ public class Miner : IJob {
     public string Icon => "\u26cf\ufe0f";
     public int WantedCreepCount => 3;
     public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
-
+    public int Priority => 0;
+    
     public void Run(ICreep creep) {
         // Check energy storage
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {

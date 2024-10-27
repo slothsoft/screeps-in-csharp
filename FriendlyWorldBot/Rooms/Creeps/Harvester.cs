@@ -19,6 +19,7 @@ public class Harvester : IJob {
     public string Icon => "🧺";
     public int WantedCreepCount => 3;
     public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
+    public int Priority => 0;
 
     public void Run(ICreep creep) {
         // Check energy storage

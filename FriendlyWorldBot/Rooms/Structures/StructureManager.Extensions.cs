@@ -45,8 +45,7 @@ public partial class StructureManager
                         continue;
                     }
                     // if the place is empty, just build
-                    if (_room.Room.CreateConstructionSite<IStructureExtension>(position) ==
-                        RoomCreateConstructionSiteResult.Ok)
+                    if (_room.Room.CreateConstructionSite<IStructureExtension>(position) == RoomCreateConstructionSiteResult.Ok)
                     {
                         somethingWasBuild = true;
                     }

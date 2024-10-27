@@ -138,7 +138,7 @@ public class CreepManager : IManager {
             return;
         }
 
-        foreach (var (jobId, creeps) in _creeps)
+        foreach (var (jobId, creeps) in _creeps.OrderBy(kv => _jobs[kv.Key].Priority))
         {
             var  job = _jobs[jobId];
             if (creeps.Count < GetWantedCreepCount(job))

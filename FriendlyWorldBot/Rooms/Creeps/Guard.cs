@@ -30,6 +30,7 @@ public class Guard : IJob {
     public string Icon => "🛡️";
     public int WantedCreepCount => _room.Ramparts.Count;
     public IEnumerable<BodyPartGroup> BodyPartGroups => GuardBodyPartGroups;
+    public int Priority => 100;
 
     public void Run(ICreep creep)
     {

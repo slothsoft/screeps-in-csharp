@@ -21,7 +21,7 @@ public static class CreepExtensions {
             creep.LogInfo($"unexpected result when harvesting {source} ({harvestResult})");
         }
     }
-    
+
     internal static bool MoveToRecycleAtSpawnIfNecessary(this ICreep creep, RoomCache room) {
         if (creep.Memory.TryGetBool(CreepSuicide, out var suicide) && suicide) {
             var nearestSpawn = room.FindNearestSpawn(creep.LocalPosition);
@@ -32,26 +32,29 @@ public static class CreepExtensions {
                 } else if (result != RecycleCreepResult.Ok) {
                     return false;
                 }
+
                 return true;
             }
+
             creep.LogError($"could not find spawn when recycling {creep}");
-            return false; 
+            return false;
         }
-        return false; 
+
+        return false;
     }
-    
+
     internal static bool MoveToPickupLostResources(this ICreep creep, RoomCache room) {
         var energySource = room.Room
-                    // concat the sources of the undertaking so we can weigh them
-                    .Find<ITombstone>().Select(t => (Amount: t.Store.GetUsedCapacity(ResourceType.Energy), RoomObject: (IRoomObject) t))
-                    .Concat(room.Room.Find<IRuin>().Select(r => (Amount: r.Store.GetUsedCapacity(ResourceType.Energy), RoomObject: (IRoomObject) r)))
-                    .Concat(room.Room.Find<IResource>().Select(r => (Amount: (int?)r.Amount, RoomObject:(IRoomObject)r)))
-                    // now sort by distance and amount (very rough estimate for how much energy will be left when the undertaker arrives)
-                    .Select(o => (o.Amount, GameObject: o.RoomObject, Weight: o.Amount - creep.LocalPosition.LinearDistanceTo(o.RoomObject.LocalPosition)))
-                    .Where(o => o.Weight > 0)
-                    .OrderByDescending(o => o.Weight)
-                    .Select(o => o.GameObject)
-                    .FirstOrDefault();
+            // concat the sources of the undertaking so we can weigh them
+            .Find<ITombstone>().Select(t => (Amount: t.Store.GetUsedCapacity(ResourceType.Energy), RoomObject: (IRoomObject) t))
+            .Concat(room.Room.Find<IRuin>().Select(r => (Amount: r.Store.GetUsedCapacity(ResourceType.Energy), RoomObject: (IRoomObject) r)))
+            .Concat(room.Room.Find<IResource>().Select(r => (Amount: (int?) r.Amount, RoomObject: (IRoomObject) r)))
+            // now sort by distance and amount (very rough estimate for how much energy will be left when the undertaker arrives)
+            .Select(o => (o.Amount, GameObject: o.RoomObject, Weight: o.Amount - creep.LocalPosition.LinearDistanceTo(o.RoomObject.LocalPosition)))
+            .Where(o => o.Weight > 0)
+            .OrderByDescending(o => o.Weight)
+            .Select(o => o.GameObject)
+            .FirstOrDefault();
         if (energySource != null) {
             switch (energySource) {
                 case IResource s:
@@ -59,69 +62,85 @@ public static class CreepExtensions {
                 case IRuin r:
                     return creep.MoveToWithdraw(r);
                 case ITombstone t:
-                    return  creep.MoveToWithdraw(t);
+                    return creep.MoveToWithdraw(t);
             }
         }
+
         return false;
     }
-    
+
     internal static bool MoveToPickup(this ICreep creep, IResource target) {
         var result = creep.Pickup(target);
         if (result == CreepPickupResult.NotInRange) {
             creep.BetterMoveTo(target.RoomPosition);
             return true;
-        } else if (result != CreepPickupResult.Ok) {
+        }
+
+        if (result != CreepPickupResult.Ok) {
             creep.LogInfo($"unexpected result when picking up {target} ({result})");
         }
+
         return result == CreepPickupResult.Ok;
     }
 
-    internal static bool MoveToWithdraw(this ICreep creep, IStructure target, ResourceType resourceType = ResourceType.Energy,  int? amount = null) {
+    internal static bool MoveToWithdraw(this ICreep creep, IStructure target, ResourceType resourceType = ResourceType.Energy, int? amount = null) {
         var result = creep.Withdraw(target, resourceType, amount);
         if (result == CreepWithdrawResult.NotInRange) {
             creep.BetterMoveTo(target.RoomPosition);
             return true;
-        } else if (result != CreepWithdrawResult.Ok) {
+        }
+
+        if (result != CreepWithdrawResult.Ok) {
             creep.LogInfo($"unexpected result when withdrawing from {target} ({result})");
         }
+
         return result == CreepWithdrawResult.Ok;
     }
-    
-    internal static bool MoveToWithdraw(this ICreep creep, IRuin target, ResourceType resourceType = ResourceType.Energy,  int? amount = null) {
+
+    internal static bool MoveToWithdraw(this ICreep creep, IRuin target, ResourceType resourceType = ResourceType.Energy, int? amount = null) {
         var result = creep.Withdraw(target, resourceType, amount);
         if (result == CreepWithdrawResult.NotInRange) {
             creep.BetterMoveTo(target.RoomPosition);
             return true;
-        } else if (result != CreepWithdrawResult.Ok) {
+        }
+
+        if (result != CreepWithdrawResult.Ok) {
             creep.LogInfo($"unexpected result when withdrawing from {target} ({result})");
         }
+
         return result == CreepWithdrawResult.Ok;
     }
-    
-    internal static bool MoveToWithdraw(this ICreep creep, ITombstone target, ResourceType resourceType = ResourceType.Energy,  int? amount = null) {
+
+    internal static bool MoveToWithdraw(this ICreep creep, ITombstone target, ResourceType resourceType = ResourceType.Energy, int? amount = null) {
         var result = creep.Withdraw(target, resourceType, amount);
         if (result == CreepWithdrawResult.NotInRange) {
             creep.BetterMoveTo(target.RoomPosition);
             return true;
-        } else if (result != CreepWithdrawResult.Ok) {
+        }
+
+        if (result != CreepWithdrawResult.Ok) {
             creep.LogInfo($"unexpected result when withdrawing from {target} ({result})");
         }
+
         return result == CreepWithdrawResult.Ok;
     }
-    
+
     private static ISource? FindAssignedResource(this ICreep creep, RoomCache room) {
         var findNearest = room.FindNearestSource(creep.LocalPosition);
         if (findNearest == null) {
             return null;
         }
+
         if (creep.IsHarvester()) {
             // harvesters are allowed to use the closest source, no matter if main or not
             return findNearest;
         }
+
         if (room.Sources.Count < 1) {
             // if there is no other source, we have no chance
             return findNearest;
         }
+
         // all else should use other sources than the main for now
         if (!creep.Room!.Memory.TryGetString(RoomMainSource, out var mainSourceId)) return null;
         return room.Sources
@@ -174,7 +193,7 @@ public static class CreepExtensions {
         if (!creep.Memory.TryGetString(CreepJob, out var jobId)) {
             return null;
         }
-      
+
         return jobId;
     }
 
@@ -196,7 +215,7 @@ public static class CreepExtensions {
 
         // second priority: attack foes!
         var enemy = creep.Room!.Find<ICreep>(my: false).FindNearest(creep.LocalPosition);
-        if (enemy != null && creep.MoveToAttack(enemy))  {
+        if (enemy != null && creep.MoveToAttack(enemy)) {
             return true;
         }
 
@@ -216,7 +235,7 @@ public static class CreepExtensions {
         } else if (attackResult != CreepAttackResult.Ok) {
             enemy.LogInfo($"unexpected result when harvesting {creep} ({attackResult})");
         }
-        
+
         // if enemy was attacked and is now done, increment kill count
         if (!enemy.Exists) {
             var jobId = creep.GetJobId();
@@ -227,5 +246,46 @@ public static class CreepExtensions {
         }
 
         return true;
+    }
+
+    public static bool MoveToBuild(this ICreep creep, IConstructionSite target) {
+        var result = creep.Build(target);
+        if (result == CreepBuildResult.NotInRange) {
+            creep.BetterMoveTo(target.RoomPosition);
+            return true;
+        }
+
+        if (result != CreepBuildResult.Ok) {
+            creep.LogInfo($"unexpected result when depositing to {target} ({result})");
+        }
+
+        return result == CreepBuildResult.Ok;
+    }
+    
+    public static void MoveAsUpgrader(this ICreep creep, RoomCache room)
+    {
+        // Check energy storage
+        if (creep.Store[ResourceType.Energy] > 0) {
+            // There is energy to use - upgrade the controller
+            var controller = room.Room.Controller;
+            if (controller == null) {
+                return;
+            }
+            var upgradeResult = creep.UpgradeController(controller);
+            if (upgradeResult == CreepUpgradeControllerResult.NotInRange) {
+                creep.BetterMoveTo(controller.RoomPosition);
+            } else if (upgradeResult != CreepUpgradeControllerResult.Ok) {
+                creep.Say("⚠");
+                creep.LogInfo($"unexpected result when depositing to {controller} ({upgradeResult})");
+            }
+        } else {
+            // We're empty - go to pick up
+            var spawn = room.FindNearestSpawn(creep.LocalPosition);
+            if (spawn == null || spawn.Store.GetUsedCapacity() < 10) { // TODO: magic number
+                creep.MoveToHarvestInRoom(room);
+                return; 
+            }
+            creep.MoveToWithdraw(spawn);
+        }
     }
 }

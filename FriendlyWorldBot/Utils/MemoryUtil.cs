@@ -97,4 +97,12 @@ public static class MemoryUtil {
     private static IMemoryObject GetKillCount(this IMemoryObject memory) {
         return memory.GetConfigObj().GetOrCreateObject("killCount");
     }
+    
+    public static IPath TryGetPath(this IMemoryObject memory, string id) {
+        return memory.TryGetString(id, out var path) ? EmptyPath.Instance :  path!.Pathify();
+    }
+    
+    public static void SetValue(this IMemoryObject memory, string id, IPath path) {
+        memory.SetValue(id, path.Stringify());
+    }
 }

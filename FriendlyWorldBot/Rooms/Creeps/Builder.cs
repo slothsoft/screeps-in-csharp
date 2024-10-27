@@ -26,6 +26,7 @@ public class Builder : IJob {
     public string Icon => "🏗️";
     public int WantedCreepCount => 3;
     public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
+    public int Priority => 40;
 
     public void Run(ICreep creep) {
         creep.Memory.TryGetBool(CreepIsBuilding, out var isBuilding);
@@ -40,7 +41,7 @@ public class Builder : IJob {
         } else
         {
             creep.Memory.SetValue(CreepTempTarget, string.Empty);
-            RunInHarvesterMode(creep);
+            creep.MoveToHarvestInRoom(_room);
 
             if (creep.Store.GetFreeCapacity(ResourceType.Energy) == 0) {
                 // we cannot mine any longer, so switch to builder mode
@@ -105,7 +106,7 @@ public class Builder : IJob {
     }
 
     private bool RunInRepairMode(ICreep creep, string targetId, double repairWallsAtPercent) {
-        var structure = _room.Room.Find<IStructure>().SingleOrDefault(s => s.Id.ToString() == targetId);
+        var structure = _game.Structures.Values.SingleOrDefault(s => s.Id.ToString() == targetId);
         if (structure != null) {
             RunInRepairMode(creep, structure, repairWallsAtPercent);
             return true;
@@ -132,12 +133,7 @@ public class Builder : IJob {
     private void RunInBuildMode(ICreep creep, double repairWallsAtPercent) {
         var constructionSite = creep.Room!.Find<IConstructionSite>().FirstOrDefault();
         if (constructionSite != null) {
-            var transferResult = creep.Build(constructionSite);
-            if (transferResult == CreepBuildResult.NotInRange) {
-                creep.BetterMoveTo(constructionSite.RoomPosition);
-            } else if (transferResult != CreepBuildResult.Ok) {
-                creep.LogInfo($"unexpected result when depositing to {constructionSite} ({transferResult})");
-            }
+            creep.MoveToBuild(constructionSite);
         } else {
             // if there is nothing else to do... top off the walls
             var wall = _room.Room.Find<IStructure>()
@@ -152,9 +148,5 @@ public class Builder : IJob {
                 RunInRepairMode(creep, wall, repairWallsAtPercent);
             }
         }
-    }
-
-    private void RunInHarvesterMode(ICreep creep) {
-        creep.MoveToHarvestInRoom(_room);
     }
 }

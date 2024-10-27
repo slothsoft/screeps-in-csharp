@@ -23,9 +23,9 @@ public class Harvester : IJob {
     public void Run(ICreep creep) {
         // Check energy storage
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
-            creep.HarvestResource(_room);
+            creep.MoveToHarvestInRoom(_room);
         } else {
-            creep.PutIntoStorage(_room);
+            creep.MoveToTransferIntoStorage(_room);
         }
     }
 }

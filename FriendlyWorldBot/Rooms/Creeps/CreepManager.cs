@@ -27,12 +27,14 @@ public class CreepManager : IManager {
     }
 
     // Populate job map - the job instances will live in the heap until the next IVM reset
-    private static IDictionary<string, IJob> CreateJobMap(IGame game, RoomCache room) {
+    private IDictionary<string, IJob> CreateJobMap(IGame game, RoomCache room) {
         var result = new List<IJob> {
             new Harvester(room),
             new Upgrader(room),
             new Builder(game, room),
             new Guard(game, room),
+            new Undertaker(room, this),
+            new Pioneer(game, this),
         };
         return result.ToDictionary(j => j.Id, j => j);
     }
@@ -44,7 +46,15 @@ public class CreepManager : IManager {
     public IEnumerable<string> JobIds => _creeps.Keys;
 
     public int GetActualCreepCount(string jobId) {
-        return _creeps[jobId].Count;
+        return GetCreeps(jobId).Count;
+    }
+    
+    public ISet<ICreep> GetCreeps(string jobId) {
+        return _creeps[jobId];
+    }
+    
+    public IEnumerable<ICreep> GetAllCreeps() {
+        return _creeps.SelectMany(kv => kv.Value);
     }
     
     public int GetWantedCreepCount(IJob job)
@@ -178,12 +188,12 @@ public class CreepManager : IManager {
         return bodyPartsToCount.Sum(kv => kv.Key.BodyPartTypes.Sum(t => _game.Constants.GetBodyPartCost(t))  * kv.Value);
     }
 
-    private void TrySpawnCreep(IStructureSpawn spawn, BodyType<BodyPartType> bodyType, string jobName) {
+    private void TrySpawnCreep(IStructureSpawn spawn, BodyType<BodyPartType> bodyType, string jobId) {
         var name = FindUniqueCreepName();
         if (spawn.SpawnCreep(bodyType, name, new(dryRun: true)) == SpawnCreepResult.Ok) {
-            Console.WriteLine($"{this}: spawning a {jobName} ({bodyType}) from {spawn}...");
+            Logger.Instance.Info($"[{_room.Name}]: spawning a {jobId} from {spawn.Id}...");
             var initialMemory = _game.CreateMemoryObject();
-            initialMemory.SetValue("job", jobName);
+            initialMemory.SetValue(CreepJob, jobId);
             spawn.SpawnCreep(bodyType, name, new(dryRun: false, memory: initialMemory));
         }
     }

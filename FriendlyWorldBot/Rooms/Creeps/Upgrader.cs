@@ -41,18 +41,10 @@ public class Upgrader : IJob
             // We're empty - go to pick up
             var spawn = _room.FindNearestSpawn(creep.LocalPosition);
             if (spawn == null || spawn.Store.GetUsedCapacity() < 10) { // TODO: magic number
-                creep.HarvestResource(_room);
+                creep.MoveToHarvestInRoom(_room);
                 return; 
             }
-            var withdrawResult = creep.Withdraw(spawn, ResourceType.Energy);
-            if (withdrawResult == CreepWithdrawResult.NotInRange)
-            {
-                creep.BetterMoveTo(spawn.RoomPosition);
-            }
-            else if (withdrawResult != CreepWithdrawResult.Ok)
-            {
-                creep.LogInfo($"unexpected result when depositing to {spawn} ({withdrawResult})");
-            }
+            creep.MoveToWithdraw(spawn);
         }
     }
 }

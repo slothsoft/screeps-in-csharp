@@ -6,6 +6,8 @@ public interface IMemoryConstants {
     public const string CreepTempTarget = "tempTarget";
     public const string CreepKeepSaying = "keepSaying";
     public const string CreepLog = "log";
+    public const string CreepJob = "job";
+    public const string CreepSuicide = "suicide";
     
     public const string RoomBrokenStructures = "brokenStructures";
     public const string RoomMainSource = "mainSource";

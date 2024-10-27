@@ -32,6 +32,7 @@ dotnet dotnet clean | dotnet publish -c Release
 # Links
 
 - [Screeps: World](https://store.steampowered.com/app/464350/Screeps_World/)
+- [Screeps API](https://docs.screeps.com/api/)
 - [thomasfn's Screeps DotNet](https://github.com/thomasfn/ScreepsDotNet)
 - [WASI SDK](https://github.com/WebAssembly/wasi-sdk?tab=readme-ov-file)
 - [Screeps Wiki](https://screeps.fandom.com/wiki/Screeps_Wiki)

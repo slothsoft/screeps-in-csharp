@@ -146,7 +146,7 @@ public class Builder : IJob {
                 .MinBy(s => (double)s.Hits / s.HitsMax);
             if (wall == null) {
                 // no construction sites, no walls, so the builder switches to harvester to be useful
-                creep.PutIntoStorage(_room);
+                creep.MoveToTransferIntoStorage(_room);
             } else {
                 creep.Memory.SetValue(CreepTempTarget, wall.Id);
                 RunInRepairMode(creep, wall, repairWallsAtPercent);
@@ -155,6 +155,6 @@ public class Builder : IJob {
     }
 
     private void RunInHarvesterMode(ICreep creep) {
-        creep.HarvestResource(_room);
+        creep.MoveToHarvestInRoom(_room);
     }
 }

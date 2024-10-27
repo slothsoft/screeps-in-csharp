@@ -8,17 +8,16 @@ using static FriendlyWorldBot.Utils.IMemoryConstants;
 namespace FriendlyWorldBot.Rooms.Creeps;
 
 /// <summary>
-/// A guard lives inside a rampart and attacks enemies or heals my game objects.
+/// A guard lives inside a rampart and attacks enemies.
 /// </summary>
 public class Guard : IJob {
-    
+    internal const string JobId = "guard";
     private static readonly BodyPartGroup[] GuardBodyPartGroups = [ 
         BodyPartGroup.Variable(1, 3, BodyPartType.Attack), 
         BodyPartGroup.Variable(0, 10, BodyPartType.Tough), 
-        BodyPartGroup.Fixed(1, BodyPartType.Move), 
+        BodyPartGroup.Fixed(1, BodyPartType.Move, BodyPartType.Carry), 
     ];
 
-    
     private readonly IGame _game;
     private readonly RoomCache _room;
 
@@ -27,35 +26,30 @@ public class Guard : IJob {
         _room = room;
     }
 
-    public string Id => "guard";
+    public string Id => JobId;
     public string Icon => "🛡️";
     public int WantedCreepCount => _room.Ramparts.Count;
     public IEnumerable<BodyPartGroup> BodyPartGroups => GuardBodyPartGroups;
 
     public void Run(ICreep creep)
     {
-        // first priority: if we already have a target, follow it
-        if (creep.Memory.TryGetString(CreepTarget, out var targetId) && !string.IsNullOrEmpty(targetId)) {
-            var targetEnemy = _room.Room.Find<ICreep>(my: false).SingleOrDefault(c => c.Id == targetId);
-            if (Attack(creep, targetEnemy)) {
-                return;
-            }
+        // first priority: if we already have a target, follow it, else try to attack enemies
+        if (creep.MoveToAttackInSameRoom()) {
+            return;
         }
-        
-        // second priority: attack foes!
-        var enemy = _room.Room.Find<ICreep>(my: false).FindNearest(creep.LocalPosition);
-        if (enemy != null) {
-            if (Attack(creep, enemy)) {
-                return;
-            }
+
+        // second priority: suicide
+        if (creep.MoveToRecycleAtSpawnIfNecessary(_room)) {
+            return;
         }
         
         // third priority: collect energy from corpses or ruins?
-        // Check energy storage
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
-            creep.HarvestResource(_room);
+            if (!creep.MoveToPickupLostResources(_room)) {
+                creep.MoveToTransferIntoStorage(_room);
+            }
         } else {
-            creep.PutIntoStorage(_room);
+            creep.MoveToTransferIntoStorage(_room);
         }
         
         // last priority: move to rampart
@@ -63,28 +57,5 @@ public class Guard : IJob {
         // if (rampart != null) {
         //     creep.BetterMoveTo(rampart.RoomPosition);
         // }
-    }
-
-    private bool Attack(ICreep creep, ICreep? enemy) {
-        if (enemy == null) {
-            creep.Memory.SetValue(CreepTarget, string.Empty);
-            return false;
-        }
-
-        creep.Memory.SetValue(CreepTarget, enemy.Id);
-        var attackResult = creep.Attack(enemy);
-        if (attackResult == CreepAttackResult.NotInRange) {
-            enemy.BetterMoveTo(enemy.RoomPosition);
-        } else if (attackResult != CreepAttackResult.Ok) {
-            enemy.LogInfo($"unexpected result when harvesting {creep} ({attackResult})");
-        }
-        
-        // if enemy was attacked and is now done, increment kill count
-        if (!enemy.Exists) {
-            _room.Room.Memory.IncrementKillCount(Id);
-            _game.Memory.IncrementKillCount(Id);
-        }
-
-        return true;
     }
 }

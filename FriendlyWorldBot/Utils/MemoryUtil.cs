@@ -1,6 +1,7 @@
 using System;
 using FriendlyWorldBot.Paths;
 using FriendlyWorldBot.Rooms.Creeps;
+using ScreepsDotNet;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
 using static FriendlyWorldBot.Utils.IMemoryConstants;
@@ -105,4 +106,9 @@ public static class MemoryUtil {
     public static void SetValue(this IMemoryObject memory, string id, IPath path) {
         memory.SetValue(id, path.Stringify());
     }
+    
+    public static IMemoryObject GetMemory(this IStructureContainer container) {
+        return Program.Game!.Memory.GetOrCreateObject("containers").GetOrCreateObject(container.Id);
+    }
+
 }

@@ -24,25 +24,23 @@ public class Pioneer : IJob {
     
     private static readonly BodyPartGroup[] PioneerBodyPartGroups = [ 
         BodyPartGroup.Variable(1, 3, BodyPartType.Move), 
-        BodyPartGroup.Variable(0, 10, BodyPartType.Tough), 
         BodyPartGroup.Fixed(1, BodyPartType.Claim, BodyPartType.Work, BodyPartType.Carry), 
     ];
     private static readonly BodyPartGroup[] PioneerWithoutClaimBodyPartGroups = [ 
         BodyPartGroup.Variable(1, 5, BodyPartType.Move, BodyPartType.Work, BodyPartType.Carry), 
-        BodyPartGroup.Variable(0, 10, BodyPartType.Tough), 
     ];
     private const string FlagNewSettlement = "[NEW]";
     
     private readonly IGame _game;
     private readonly RoomCache _room;
-    private readonly CreepManager _creepManager;
+    private readonly ICreepsCache _creeps;
     
     private readonly IDictionary<string, RoomCache> _otherRoomCaches = new Dictionary<string, RoomCache>();
     
-    public Pioneer(IGame game, RoomCache room, CreepManager creepManager) {
+    public Pioneer(IGame game, RoomCache room, ICreepsCache creeps) {
         _game = game;
         _room = room;
-        _creepManager = creepManager;
+        _creeps = creeps;
     }
 
     public string Id => "pioneer";
@@ -68,7 +66,7 @@ public class Pioneer : IJob {
     }
 
     private string? FetchNextFlagName() {
-        var usedFlagNames = _creepManager
+        var usedFlagNames = _creeps
             .GetCreeps(Id)
             .Select(c => c.Memory.TryGetString(CreepTarget, out var flagName) ? flagName : null)
             .OfType<string>().ToArray();

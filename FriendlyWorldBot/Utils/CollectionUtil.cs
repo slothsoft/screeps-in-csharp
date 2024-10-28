@@ -13,4 +13,10 @@ public static class CollectionUtil {
         dict.Add(key, value);
         return value;
     }
+
+    public static void RemoveRange<TValue>(this ICollection<TValue> collection, IEnumerable<TValue> enumerable) {
+        foreach (var e in enumerable) {
+            collection.Remove(e);
+        }
+    }
 }

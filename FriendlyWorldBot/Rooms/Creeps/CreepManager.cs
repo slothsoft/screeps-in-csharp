@@ -9,7 +9,7 @@ using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Rooms.Creeps;
 
-public class CreepManager : IManager {
+public class CreepManager : IManager, ICreepsCache {
     internal static PolyVisualStyle? PathStyle; 
     private static readonly Random Random = new();
     
@@ -29,12 +29,13 @@ public class CreepManager : IManager {
     // Populate job map - the job instances will live in the heap until the next IVM reset
     private IDictionary<string, IJob> CreateJobMap(IGame game, RoomCache room) {
         var result = new List<IJob> {
-            new Harvester(room),
-            new Upgrader(room),
             new Builder(game, room),
-            new Pioneer(game, room, this),
             new Guard(game, room),
+            new Harvester(room),
+            // new Miner(room, this),
+            new Pioneer(game, room, this),
             new Undertaker(room, this),
+            new Upgrader(room),
         };
         return result.ToDictionary(j => j.Id, j => j);
     }

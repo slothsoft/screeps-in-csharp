@@ -15,16 +15,16 @@ public class Undertaker : IJob {
     ];
     
     private readonly RoomCache _room;
-    private readonly CreepManager _creepManager;
+    private readonly ICreepsCache _creeps;
 
-    public Undertaker(RoomCache room, CreepManager creepManager) {
+    public Undertaker(RoomCache room, ICreepsCache creeps) {
         _room = room;
-        _creepManager = creepManager;
+        _creeps = creeps;
     }
 
     public string Id => JobId;
     public string Icon => "\u26b0\ufe0f";
-    public int WantedCreepCount => _creepManager.GetAllCreeps().Count() >= 9 && !_creepManager.GetCreeps(Guard.JobId).Any() ? 1 : 0; // TODO magic number
+    public int WantedCreepCount => _creeps.GetAllCreeps().Count() >= 9 && !_creeps.GetCreeps(Guard.JobId).Any() ? 1 : 0; // TODO magic number
     public IEnumerable<BodyPartGroup> BodyPartGroups => UndertakerBodyPartGroups;
     public int Priority => 200;
 

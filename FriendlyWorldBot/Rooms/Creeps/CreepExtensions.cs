@@ -7,6 +7,7 @@ using static FriendlyWorldBot.Utils.IMemoryConstants;
 namespace FriendlyWorldBot.Rooms.Creeps;
 
 public static class CreepExtensions {
+    
     // ATTACK - https://docs.screeps.com/api/#Creep.attack
 
     public static bool MoveToAttackInSameRoom(this ICreep creep) {

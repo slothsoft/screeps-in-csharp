@@ -25,6 +25,9 @@ public interface IMemoryConstants {
     public const double GameRepairWallsAtPercentDefault = 0.00001; // should be around 3000
     
     public const string SpawnMain = "main";
+    
+    public const string ContainerWithSource = "sourceContainer";
+    
     public const string TotalEnemiesKilled = "totalEnemiesKilled";
     public const string Gate = "gate";
 }

@@ -11,7 +11,7 @@ dotnet workload install wasi-experimental
 ```
 3. Link publish folder to screeps
 ```shell 
-dotnetmklink /J ...\screeps-in-csharp\FriendlyWorldBot\bin\Debug\net8.0\wasi-wasm\AppBundle\world ...AppData\Local\Screeps\scripts\...
+mklink /J ...\screeps-in-csharp\FriendlyWorldBot\bin\Debug\net8.0\wasi-wasm\AppBundle\world ...AppData\Local\Screeps\scripts\...
 ```
 
 # Publish Bot

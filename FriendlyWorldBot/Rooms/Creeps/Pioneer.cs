@@ -26,13 +26,22 @@ public class Pioneer : IJob {
         BodyPartGroup.Variable(0, 10, BodyPartType.Tough), 
         BodyPartGroup.Fixed(1, BodyPartType.Claim, BodyPartType.Work, BodyPartType.Carry), 
     ];
+    private static readonly BodyPartGroup[] PioneerWithoutClaimBodyPartGroups = [ 
+        BodyPartGroup.Variable(1, 5, BodyPartType.Move), 
+        BodyPartGroup.Variable(0, 10, BodyPartType.Tough), 
+        BodyPartGroup.Fixed(1, BodyPartType.Work, BodyPartType.Carry), 
+    ];
     private const string FlagNewSettlement = "[NEW]";
     
     private readonly IGame _game;
+    private readonly RoomCache _room;
     private readonly CreepManager _creepManager;
-
-    public Pioneer(IGame game, CreepManager creepManager) {
+    
+    private readonly IDictionary<string, RoomCache> _otherRoomCaches = new Dictionary<string, RoomCache>();
+    
+    public Pioneer(IGame game, RoomCache room, CreepManager creepManager) {
         _game = game;
+        _room = room;
         _creepManager = creepManager;
     }
 
@@ -40,7 +49,16 @@ public class Pioneer : IJob {
     public string Icon => "\ud83e\udd20";
     public int WantedCreepCount => _game.Flags.Count(f => f.Key.StartsWith(FlagNewSettlement));
     public int Priority => 50;
-    public IEnumerable<BodyPartGroup> BodyPartGroups => PioneerBodyPartGroups;
+    public IEnumerable<BodyPartGroup> BodyPartGroups {
+        get {
+            var flagName = FetchNextFlagName();
+            if (flagName != null && _game.Flags[flagName].Room != null) {
+                // if we can see the room, it's ours. so we don't need CLAIM any more
+                return PioneerWithoutClaimBodyPartGroups;
+            }
+            return PioneerBodyPartGroups;
+        }
+    }
 
     public void OnCreepSpawned(ICreep creep) {
        var notUsedFlagName = FetchNextFlagName();
@@ -68,13 +86,15 @@ public class Pioneer : IJob {
     {
         // o. recycle if flag was not set correctly
         if (!creep.Memory.TryGetString(CreepTarget, out var flagName) || string.IsNullOrEmpty(flagName)) {
-            return;
+            creep.Memory.SetValue(CreepSuicide, true);
+            if (creep.MoveToRecycleAtSpawnIfNecessary(_room))
+                return;
         }
         var log = 0;
         creep.Memory.SetValue(CreepPioneerLog + log++, $"Flag {flagName} was fond");
         
         // 1. send a creep to an unowned room
-        var flag = _game.Flags.GetValueOrDefault(flagName);
+        var flag = _game.Flags!.GetValueOrDefault(flagName);
         if (flag == null) {
             return;
         }
@@ -104,6 +124,7 @@ public class Pioneer : IJob {
         creep.Memory.SetValue(CreepPioneerLog + log++, $"The controller {controller.Id} of {room.Name} room was claimed");
         
         // 3. place a spawn construction site
+        var spawnName = flagName![(FlagNewSettlement.Length + 1)..];
         var spawn = room.Find<IRoomObject>().FirstOrDefault(s => s is IStructureSpawn || (s is IConstructionSite cs && cs.StructureType == typeof(IStructureSpawn)));
         if (spawn == null) {
             var path = flag.Memory.TryGetPath(FlagSpawnCoordinate);
@@ -115,7 +136,6 @@ public class Pioneer : IJob {
             var position = path.ToPositions().Single();
             var spiral = new Position(0, 0);
             var number = 1;
-            var spawnName = flagName[(FlagNewSettlement.Length + 1)..];
             while (room.CreateConstructionSite<IStructureSpawn>(
                        new Position(position.X + spiral.X, position.Y + spiral.Y),
                        spawnName
@@ -125,8 +145,8 @@ public class Pioneer : IJob {
             }
 
             spawn = room.Find<IConstructionSite>().FirstOrDefault(s => s.StructureType == typeof(IStructureSpawn));
-            creep.Memory.SetValue(CreepPioneerLog + log++, $"Construction site for {spawnName} of {room.Name} was set down");
-        } else log++;
+        } 
+        creep.Memory.SetValue(CreepPioneerLog + log++, $"Construction site for {spawnName} of {room.Name} was set down");
         
         // 4. build this spawn object
         if (spawn is IConstructionSite constructionSite) {
@@ -140,7 +160,7 @@ public class Pioneer : IJob {
                 }
             } else {
                 creep.Memory.SetValue(CreepTempTarget, string.Empty);
-                creep.MoveToHarvestInRoom(new RoomCache(room));
+                creep.MoveToHarvestInRoom(GetRoomCache(room));
 
                 if (creep.Store.GetFreeCapacity(ResourceType.Energy) == 0) {
                     // we cannot mine any longer, so switch to builder mode
@@ -152,12 +172,17 @@ public class Pioneer : IJob {
         creep.Memory.SetValue(CreepPioneerLog + log++, $"Spawn of {room.Name} was constructed");
         
         // 5. Remove the flag so no more pioneers are sent
-        flag.Remove();
+        // flag.Remove();
         creep.Memory.SetValue(CreepPioneerLog + log++, $"Flag {flagName} was removed");
+        _otherRoomCaches.Remove(room.Name);
 
         // 6. keep the controller from downgrading and losing a Room Control Level (RCL)
-        creep.MoveAsUpgrader(new RoomCache(room));
+        creep.MoveAsUpgrader(GetRoomCache(room));
         creep.Memory.SetValue(CreepPioneerLog + log, $"Upgrading {room.Name}...");
+    }
+
+    private RoomCache GetRoomCache(IRoom room) {
+        return _otherRoomCaches.GetOrCreate(room.Name, _ => new RoomCache(room));
     }
 
     private static IPath CalculateSpawnCoordinate(IRoom room) {

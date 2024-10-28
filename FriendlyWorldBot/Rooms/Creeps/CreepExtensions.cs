@@ -136,7 +136,7 @@ public static class CreepExtensions {
             return findNearest;
         }
 
-        if (room.Sources.Count < 1) {
+        if (room.Sources.Count <= 1) {
             // if there is no other source, we have no chance
             return findNearest;
         }

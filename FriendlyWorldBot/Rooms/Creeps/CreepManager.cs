@@ -32,9 +32,9 @@ public class CreepManager : IManager {
             new Harvester(room),
             new Upgrader(room),
             new Builder(game, room),
+            new Pioneer(game, room, this),
             new Guard(game, room),
             new Undertaker(room, this),
-            new Pioneer(game, this),
         };
         return result.ToDictionary(j => j.Id, j => j);
     }

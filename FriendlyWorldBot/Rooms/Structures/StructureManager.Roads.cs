@@ -22,12 +22,12 @@ public partial class StructureManager {
     private bool BuildSpawnRoads() {
         var createdRoomsForLevel = _room.Room.Memory.TryGetInt(RoomCreatedRoadsForLevel, out var l) ? l : 0;
         var controllerLevel = _room.Room.Controller!.Level;
-        if (createdRoomsForLevel >= controllerLevel) return false;
+        // TODO: if (createdRoomsForLevel >= controllerLevel) return false;
         
         var roadCount = 0;
         var maxExtensions = _game.Constants.Controller.GetMaxStructureCount<IStructureExtension>(controllerLevel);
         var additionalExtensions = _room.Room.Memory.TryGetInt(RoomAdditionalExtensions, out var ae) ? ae : 0;
-        var maxSpawnPositions =  (maxExtensions + additionalExtensions).ToUlamSpiral().ToArray();
+        var maxSpawnPositions =  (maxExtensions + additionalExtensions + 10).ToUlamSpiral().ToArray(); // TODO: magic number for the spaces between extensions
 
         if (maxSpawnPositions.Length == 0) {
             return false; // there is no spawn yet, so we cannot build anything
@@ -43,8 +43,9 @@ public partial class StructureManager {
 
             for (var x = minX; x <= maxX; x++) {
                 for (var y = minY; y <= maxY; y++) {
-                    if (IsValidRoadPosition(x - spawnPosition.X, y - spawnPosition.Y)) {
-                        if (_room.Room.CreateConstructionSite<IStructureRoad>(new Position(x, y)) == RoomCreateConstructionSiteResult.Ok) {
+                    if (IsValidRoadPosition(x, y)) {
+                        var constructionResult = _room.Room.CreateConstructionSite<IStructureRoad>(new Position(x + spawnPosition.X, y + spawnPosition.Y));
+                        if (constructionResult == RoomCreateConstructionSiteResult.Ok) {
                             roadCount++;
                             if (roadCount >= MaxConstructionSites) {
                                 return true;

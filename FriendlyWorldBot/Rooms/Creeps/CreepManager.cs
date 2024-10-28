@@ -204,13 +204,17 @@ public class CreepManager : IManager {
         if (job == null) {
             return;
         }
-
         if (_game.GetConfigBool("showJobs")) {
             creep.Say(job.Icon);
         }
-
         // Run the job logic
-        job.Run(creep);
+        try {
+            job.Run(creep);
+        } catch (Exception e) {
+            creep.LogError(e.Message);
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     private IJob? GetCreepJob(ICreep creep) {

@@ -23,7 +23,7 @@ public class Undertaker : IJob {
     }
 
     public string Id => JobId;
-    public string Icon => "\u26b0\ufe0f \u26b1\ufe0f \ud83e\udea6";
+    public string Icon => "\u26b0\ufe0f";
     public int WantedCreepCount => _creepManager.GetAllCreeps().Count() >= 9 && !_creepManager.GetCreeps(Guard.JobId).Any() ? 1 : 0; // TODO magic number
     public IEnumerable<BodyPartGroup> BodyPartGroups => UndertakerBodyPartGroups;
     public int Priority => 200;

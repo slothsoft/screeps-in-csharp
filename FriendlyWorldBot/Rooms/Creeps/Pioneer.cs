@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using FriendlyWorldBot.Paths;
+using FriendlyWorldBot.Rooms.Structures;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
@@ -27,9 +28,8 @@ public class Pioneer : IJob {
         BodyPartGroup.Fixed(1, BodyPartType.Claim, BodyPartType.Work, BodyPartType.Carry), 
     ];
     private static readonly BodyPartGroup[] PioneerWithoutClaimBodyPartGroups = [ 
-        BodyPartGroup.Variable(1, 5, BodyPartType.Move), 
+        BodyPartGroup.Variable(1, 5, BodyPartType.Move, BodyPartType.Work, BodyPartType.Carry), 
         BodyPartGroup.Variable(0, 10, BodyPartType.Tough), 
-        BodyPartGroup.Fixed(1, BodyPartType.Work, BodyPartType.Carry), 
     ];
     private const string FlagNewSettlement = "[NEW]";
     
@@ -84,7 +84,11 @@ public class Pioneer : IJob {
 
     public void Run(ICreep creep)
     {
-        // o. recycle if flag was not set correctly
+        if (creep.MoveToRecycleAtSpawnIfNecessary(_room)) {
+            return;
+        }
+        
+        // o. recycle myself if flag was not set correctly
         if (!creep.Memory.TryGetString(CreepTarget, out var flagName) || string.IsNullOrEmpty(flagName)) {
             creep.Memory.SetValue(CreepSuicide, true);
             if (creep.MoveToRecycleAtSpawnIfNecessary(_room))
@@ -113,26 +117,22 @@ public class Pioneer : IJob {
         }
         var room = creep.Room!;
         if (!controller.My) {
-            var claimResult = creep.ClaimController(controller);
-            if (claimResult == CreepClaimControllerResult.NotInRange) {
-                creep.BetterMoveTo(controller.RoomPosition);
-            } else if (claimResult != CreepClaimControllerResult.Ok) {
-                creep.LogError($"unexpected result when claiming {controller} ({claimResult})");
-            }
+            creep.MoveToClaim(controller);
             return;
         }
         creep.Memory.SetValue(CreepPioneerLog + log++, $"The controller {controller.Id} of {room.Name} room was claimed");
         
         // 3. place a spawn construction site
         var spawnName = flagName![(FlagNewSettlement.Length + 1)..];
-        var spawn = room.Find<IRoomObject>().FirstOrDefault(s => s is IStructureSpawn || (s is IConstructionSite cs && cs.StructureType == typeof(IStructureSpawn)));
+        var spawn = room.Find<IStructureSpawn>().OfType<IRoomObject>()
+            .Concat(room.Find<IConstructionSite>().Where(c => c.IsStructure<IStructureSpawn>()))
+            .FirstOrDefault();
         if (spawn == null) {
             var path = flag.Memory.TryGetPath(FlagSpawnCoordinate);
             if (!path.ToPositions().Any()) {
                 path = CalculateSpawnCoordinate(creep.Room!);
                 flag.Memory.SetValue(FlagSpawnCoordinate, path.Stringify());
             }
-
             var position = path.ToPositions().Single();
             var spiral = new Position(0, 0);
             var number = 1;
@@ -143,7 +143,6 @@ public class Pioneer : IJob {
                 spiral = number.ToUlamSpiral().Last();
                 number++;
             }
-
             spawn = room.Find<IConstructionSite>().FirstOrDefault(s => s.StructureType == typeof(IStructureSpawn));
         } 
         creep.Memory.SetValue(CreepPioneerLog + log++, $"Construction site for {spawnName} of {room.Name} was set down");
@@ -154,13 +153,17 @@ public class Pioneer : IJob {
             if (isBuilding) {
                 creep.MoveToBuild(constructionSite);
 
-                if (creep.Store.GetUsedCapacity(ResourceType.Energy) == 0) {
+                if (!creep.HasResource()) {
                     // we cannot build any longer, so switch to harvester mode
                     creep.Memory.SetValue(CreepIsBuilding, false);
                 }
             } else {
-                creep.Memory.SetValue(CreepTempTarget, string.Empty);
-                creep.MoveToHarvestInRoom(GetRoomCache(room));
+                var nearestSource = room.Find<ISource>().FindNearest(creep.LocalPosition);
+                if (nearestSource == null) {
+                    creep.LogError($"Could not find source in room {room.Name}");
+                    return;
+                }
+                creep.MoveToHarvest(nearestSource!);
 
                 if (creep.Store.GetFreeCapacity(ResourceType.Energy) == 0) {
                     // we cannot mine any longer, so switch to builder mode

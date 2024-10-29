@@ -173,7 +173,7 @@ public class Pioneer : IJob {
         creep.Memory.SetValue(CreepPioneerLog + log++, $"Spawn of {room.Name} was constructed");
         
         // 5. Remove the flag so no more pioneers are sent
-        // flag.Remove();
+        // flag.Remove(); // FIXME: once the flag is gone, the pioneer can't find the room anymore for 6.
         creep.Memory.SetValue(CreepPioneerLog + log++, $"Flag {flagName} was removed");
         _otherRoomCaches.Remove(room.Name);
 

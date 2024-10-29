@@ -74,6 +74,12 @@ public partial class StructureManager
 
     public static IEnumerable<Position> CreateExtensionPositions(ICollection<IStructureSpawn> spawns, int expectedCount = 10) {
         IEnumerable<Position> result = new List<Position>();
+        if (spawns.Count == 0)
+        {
+            // FIXME we need to add new spawns to wherever
+            return result;
+        }
+        
         var expectedPerSpawn = expectedCount / spawns.Count;
         foreach (var spawn in spawns) {
             result = result.Concat(expectedPerSpawn.ToUlamSpiral(IsValidExtensionPosition).Select(pos => new Position(

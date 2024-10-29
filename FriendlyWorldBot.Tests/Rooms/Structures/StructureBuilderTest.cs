@@ -7,10 +7,10 @@ using Xunit.Abstractions;
 
 namespace FriendlyWorldBots.Rsoms.Structures;
 
-public class StructureManagerTest {
+public class StructureBuilderTest {
     private readonly ITestOutputHelper _testOutputHelper;
 
-    public StructureManagerTest(ITestOutputHelper testOutputHelper) {
+    public StructureBuilderTest(ITestOutputHelper testOutputHelper) {
         _testOutputHelper = testOutputHelper;
     }
 
@@ -66,7 +66,7 @@ public class StructureManagerTest {
     [InlineData(-2, -4, true)]
     [InlineData(2, -4, true)]
     public void IsValidPosition(int x, int y, bool expected) {
-        var actual = StructureManager.IsValidExtensionPosition(new Position(x, y));
+        var actual = StructureBuilder.IsValidExtensionPosition(new Position(x, y));
         actual.Should().Be(expected);
     }
 
@@ -76,7 +76,7 @@ public class StructureManagerTest {
         spawn.Setup(s => s.LocalPosition).Returns(new Position(3, 7));
 
         var number = 50;
-        var actual = StructureManager.CreateExtensionPositions([ spawn.Object ], number).ToList();
+        var actual = StructureBuilder.CreateExtensionPositions([ spawn.Object ], out _, number).ToList();
         actual.Should().HaveCountGreaterOrEqualTo(number);
         actual.Should().Contain(new Position(2, 5));
     }

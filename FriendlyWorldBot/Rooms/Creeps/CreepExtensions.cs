@@ -117,7 +117,7 @@ public static class CreepExtensions {
     
     internal static bool MoveToRecycleAtSpawnIfNecessary(this ICreep creep, RoomCache room) {
         if (creep.Memory.TryGetBool(CreepSuicide, out var suicide) && suicide) {
-            var nearestSpawn = room.FindNearestSpawn(creep.LocalPosition);
+            var nearestSpawn = room.Spawns.FindNearest(creep.LocalPosition);
             nearestSpawn ??= room.MainSpawn;
             if (nearestSpawn != null) {
                 var result = nearestSpawn.RecycleCreep(creep);
@@ -221,7 +221,7 @@ public static class CreepExtensions {
     // FIND
 
     internal static ISource? FindAssignedResource(this ICreep creep, RoomCache room) {
-        var findNearest = room.FindNearestSource(creep.LocalPosition);
+        var findNearest = room.Sources.FindNearest(creep.LocalPosition);
         if (findNearest == null) {
             return null;
         }
@@ -244,7 +244,7 @@ public static class CreepExtensions {
     }
 
     internal static void MoveToTransferIntoStorage(this ICreep creep, RoomCache room) {
-        var spawn = room.FindNearestSpawn(creep.LocalPosition);
+        var spawn = room.Spawns.FindNearest(creep.LocalPosition);
         if (spawn == null || spawn.Store.GetFreeCapacity(ResourceType.Energy) == 0) {
             creep.MoveToTransferIntoExtension(room);
             return;
@@ -313,7 +313,7 @@ public static class CreepExtensions {
             }
         } else {
             // We're empty - go to pick up
-            var spawn = room.FindNearestSpawn(creep.LocalPosition);
+            var spawn = room.Spawns.FindNearest(creep.LocalPosition);
             if (spawn == null || spawn.Store.GetUsedCapacity() < 10) {
                 // TODO: magic number
                 creep.MoveToHarvestInRoom(room);

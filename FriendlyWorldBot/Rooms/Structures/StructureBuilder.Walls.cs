@@ -8,7 +8,7 @@ using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Rooms.Structures;
 
-public partial class StructureManager
+public partial class StructureBuilder
 {
     private bool BuildWalls()
     {

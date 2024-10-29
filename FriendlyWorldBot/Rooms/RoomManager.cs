@@ -19,13 +19,14 @@ public class RoomManager : IManager {
         _cache = new RoomCache(room);
         var creepManager = new CreepManager(game, _cache);
         _delegates = [
-            new StructureManager(game, _cache),
+            new StructureBuilder(game, _cache),
             creepManager,
             new GuiManager(game, _cache, creepManager),
         ];
     }
 
     public void Tick() {
+        _cache.Tick();
         foreach (var delegateManager in _delegates) {
             delegateManager.Tick();
         }

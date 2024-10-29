@@ -5,7 +5,10 @@ using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Rooms.Structures;
 
-public partial class StructureManager : IManager
+/// <summary>
+/// Automatic Builder: https://wiki.screepspl.us/index.php/Automatic_base_building
+/// </summary>
+public partial class StructureBuilder : IManager
 {
     private const int BuildEveryTicks = 60;
     private const int MaxConstructionSites = 7;
@@ -13,7 +16,7 @@ public partial class StructureManager : IManager
     private readonly IGame _game;
     private readonly RoomCache _room;
 
-    public StructureManager(IGame game, RoomCache room) {
+    public StructureBuilder(IGame game, RoomCache room) {
         _game = game;
         _room = room;
 

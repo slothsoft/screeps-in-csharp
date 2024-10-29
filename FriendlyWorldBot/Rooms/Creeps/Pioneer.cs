@@ -98,6 +98,9 @@ public class Pioneer : IJob {
         // 1. send a creep to an unowned room
         var flag = _game.Flags!.GetValueOrDefault(flagName);
         if (flag == null) {
+            // 6. keep the controller from downgrading and losing a Room Control Level (RCL)
+            creep.MoveAsUpgrader(GetRoomCache(creep.Room!));
+            creep.Memory.SetValue(CreepPioneerLog + "X", $"Upgrading {creep.Room!}...");
             return;
         }
         if (creep.RoomPosition.RoomName != flag.RoomPosition.RoomName) {
@@ -176,10 +179,6 @@ public class Pioneer : IJob {
         // flag.Remove(); // FIXME: once the flag is gone, the pioneer can't find the room anymore for 6.
         creep.Memory.SetValue(CreepPioneerLog + log++, $"Flag {flagName} was removed");
         _otherRoomCaches.Remove(room.Name);
-
-        // 6. keep the controller from downgrading and losing a Room Control Level (RCL)
-        creep.MoveAsUpgrader(GetRoomCache(room));
-        creep.Memory.SetValue(CreepPioneerLog + log, $"Upgrading {room.Name}...");
     }
 
     private RoomCache GetRoomCache(IRoom room) {

@@ -8,7 +8,7 @@ using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Rooms.Structures;
 
-public partial class StructureManager
+public partial class StructureBuilder
 {
     private bool BuildExtensions() {
         var controller = _room.Room.Controller;
@@ -20,7 +20,7 @@ public partial class StructureManager
         var somethingWasBuild = false;
         if (possibleExtensions > existingExtensions || showExtensions) {
             var additionalExtensions = _room.Room.Memory.TryGetInt(RoomAdditionalExtensions, out var ae) ? ae : 0;
-            var positions = CreateExtensionPositions(_room.SpawnsForExtensionConstruction.ToArray(), possibleExtensions + additionalExtensions).ToList();
+            var positions = CreateExtensionPositions(_room.SpawnsForExtensionConstruction.ToArray(), out var skipped, possibleExtensions + additionalExtensions).ToList();
 
             if (possibleExtensions > existingExtensions) {
                 var minX = positions.Select(p => p.X).Min();
@@ -29,7 +29,7 @@ public partial class StructureManager
                 var maxY = positions.Select(p => p.Y).Max();
 
                 // find out if we can place extensions at the points in question or if we need to get additional ones
-                var newAdditionalExtensions = 0;
+                var newAdditionalExtensions = skipped[0];
                 var area = _room.Room.LookAtArea(new Position(minX, minY), new Position(maxX, maxY)).ToList();
                 foreach (var position in positions) {
                     var stuffAtPosition = area.Where(o => o.LocalPosition == position).ToArray();
@@ -72,22 +72,29 @@ public partial class StructureManager
         return _game.Constants.Controller.GetMaxStructureCount<IStructureExtension>(roomLevel);
     }
 
-    public static IEnumerable<Position> CreateExtensionPositions(ICollection<IStructureSpawn> spawns, int expectedCount = 10) {
+    public static IEnumerable<Position> CreateExtensionPositions(ICollection<IStructureSpawn> spawns, out int[] skipped, int expectedCount = 10) {
         IEnumerable<Position> result = new List<Position>();
-        if (spawns.Count == 0)
-        {
-            // FIXME we need to add new spawns to wherever
+        if (spawns.Count == 0) {
+            skipped = [0];
             return result;
         }
         
         var expectedPerSpawn = expectedCount / spawns.Count;
+        int[] array = [0];
         foreach (var spawn in spawns) {
-            result = result.Concat(expectedPerSpawn.ToUlamSpiral(IsValidExtensionPosition).Select(pos => new Position(
-                pos.X + spawn.LocalPosition.X,
-                pos.Y + spawn.LocalPosition.Y
-            )));
+            result = result
+                .Concat(expectedPerSpawn.ToUlamSpiral(p => {
+                            var r = IsValidExtensionPosition(p);
+                            if (!r) {
+                                array[0]++;
+                            }
+                            return r;
+                        }).Select(pos => new Position(
+                            pos.X + spawn.LocalPosition.X,
+                            pos.Y + spawn.LocalPosition.Y
+                        )));
         }
-
+        skipped = array;
         return result;
     }
 

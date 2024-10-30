@@ -76,7 +76,7 @@ public class StructureBuilderTest {
         spawn.Setup(s => s.LocalPosition).Returns(new Position(3, 7));
 
         var number = 50;
-        var actual = StructureBuilder.CreateExtensionPositions([ spawn.Object ], out _, number).ToList();
+        var actual = StructureBuilder.CreateExtensionPositions(spawn.Object, out _, number).ToList();
         actual.Should().HaveCountGreaterOrEqualTo(number);
         actual.Should().Contain(new Position(2, 5));
     }

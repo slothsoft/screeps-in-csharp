@@ -15,19 +15,17 @@ public class RoomCache : IManager {
     }
 
     public IRoom Room { get; init; }
-    public IList<IStructureSpawn> Spawns { get; } = new List<IStructureSpawn>();
-    public IList<IStructureExtension> Extensions { get; } = new List<IStructureExtension>();
-    public IList<IStructureRampart> Ramparts { get; } = new List<IStructureRampart>();
-    public IList<IStructureTower> Towers { get; } = new List<IStructureTower>();
-    public IList<IStructure> OtherStructures { get; } = new List<IStructure>();
-    public IList<IStructure> AllStructures { get; } = new List<IStructure>();
-    
     public IList<ISource> Sources {
         get {
             _sources ??= Room.Find<ISource>().ToList();
             return _sources;
         }
     }
+    public IEnumerable<IStructureSpawn> Spawns => AllStructures.OfType<IStructureSpawn>();
+    public IEnumerable<IStructureExtension> Extensions => AllStructures.OfType<IStructureExtension>();
+    public IEnumerable<IStructureRampart> Ramparts => AllStructures.OfType<IStructureRampart>();
+    public IEnumerable<IStructureTower> Towers => AllStructures.OfType<IStructureTower>();
+    public IList<IStructure> AllStructures { get; } = new List<IStructure>();
     
     public IEnumerable<IStructureSpawn> SpawnsForExtensionConstruction {
         get {
@@ -47,7 +45,6 @@ public class RoomCache : IManager {
                     spawn.Memory.SetValue(SpawnMain, spawn == mainSpawn);
                 }
             }
-
             return mainSpawn;
         }
     }
@@ -100,24 +97,13 @@ public class RoomCache : IManager {
         var structures = Room.Find<IStructure>();
         foreach (var structure in structures) {
             if (!AllStructures.Contains(structure)) {
-                switch (structure) {
-                    case IStructureSpawn spawn:
-                        Spawns.Add(spawn);
-                        break;
-                    case IStructureExtension extension:
-                        Extensions.Add(extension);
-                        break;
-                    case IStructureRampart rampart:
-                        Ramparts.Add(rampart);
-                        break;
-                    case IStructureTower tower:
-                        Towers.Add(tower);
-                        break;
-                    default:
-                        OtherStructures.Add(structure);
-                        break;
-                }
                 AllStructures.Add(structure);
+            }
+        }
+        
+        foreach (var structure in AllStructures.ToArray()) {
+            if (!structure.Exists) {
+                AllStructures.Remove(structure);
             }
         }
     }

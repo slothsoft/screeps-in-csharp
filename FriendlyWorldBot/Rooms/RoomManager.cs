@@ -1,10 +1,7 @@
-﻿using System;
-using System.Linq;
-using FriendlyWorldBot.Gui;
+﻿using FriendlyWorldBot.Gui;
 using FriendlyWorldBot.Rooms.Creeps;
 using FriendlyWorldBot.Rooms.Structures;
 using ScreepsDotNet.API.World;
-using static FriendlyWorldBot.Utils.IMemoryConstants;
 
 namespace FriendlyWorldBot.Rooms;
 
@@ -22,6 +19,7 @@ public class RoomManager : IManager {
             new StructureBuilder(game, _cache),
             creepManager,
             new GuiManager(game, _cache, creepManager),
+            new StructureManager(game, _cache),
         ];
     }
 

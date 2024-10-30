@@ -13,9 +13,10 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 public class Guard : IJob {
     internal const string JobId = "guard";
     private static readonly BodyPartGroup[] GuardBodyPartGroups = [ 
+        BodyPartGroup.Variable(0, 5, BodyPartType.Tough), 
         BodyPartGroup.Variable(1, 3, BodyPartType.Attack), 
-        BodyPartGroup.Variable(0, 10, BodyPartType.Tough), 
-        BodyPartGroup.Fixed(1, BodyPartType.Move, BodyPartType.Carry), 
+        BodyPartGroup.Variable(1, 3, BodyPartType.Move), 
+        BodyPartGroup.Fixed(1, BodyPartType.Carry), 
     ];
 
     private readonly IGame _game;
@@ -28,29 +29,48 @@ public class Guard : IJob {
 
     public string Id => JobId;
     public string Icon => "🛡️";
-    public int WantedCreepCount => _room.Ramparts.Count;
+    public int WantedCreepCount => _room.Ramparts.Count();
     public IEnumerable<BodyPartGroup> BodyPartGroups => GuardBodyPartGroups;
     public int Priority => 100;
 
     public void Run(ICreep creep)
     {
-        // first priority: if we already have a target, follow it, else try to attack enemies
-        if (creep.MoveToAttackInSameRoom()) {
-            return;
+        // first priority: suicide
+        if (!creep.Body.Any(p => p.Type is BodyPartType.Attack or BodyPartType.RangedAttack)) {
+            // we can't attack any longer, so suicide
+            creep.Memory.SetValue(CreepSuicide, false);
         }
-
-        // second priority: suicide
         if (creep.MoveToRecycleAtSpawnIfNecessary(_room)) {
             return;
         }
         
+        // second priority: if we already have a target, follow it, else try to attack enemies
+        if (creep.MoveToAttackInSameRoom()) {
+            return;
+        }
+
+        
         // third priority: collect energy from corpses or ruins?
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
             if (!creep.MoveToPickupLostResources(_room)) {
-                creep.MoveToTransferIntoStorage(_room);
+                var tower = _room.Towers.FindNearest(creep.LocalPosition);
+                if (tower == null) return;
+                var transferResult = creep.Transfer(tower, ResourceType.Energy);
+                if (transferResult == CreepTransferResult.NotInRange) {
+                    creep.BetterMoveTo(tower.RoomPosition);
+                } else if (transferResult != CreepTransferResult.Ok && transferResult != CreepTransferResult.NotEnoughResources) {
+                    creep.LogInfo($"unexpected result when transfering to {tower} ({transferResult})");
+                }
             }
         } else {
-            creep.MoveToTransferIntoStorage(_room);
+            var tower = _room.Towers.FindNearest(creep.LocalPosition);
+            if (tower == null) return;
+            var transferResult = creep.Transfer(tower, ResourceType.Energy);
+            if (transferResult == CreepTransferResult.NotInRange) {
+                creep.BetterMoveTo(tower.RoomPosition);
+            } else if (transferResult != CreepTransferResult.Ok && transferResult != CreepTransferResult.NotEnoughResources) {
+                creep.LogInfo($"unexpected result when transfering to {tower} ({transferResult})");
+            }
         }
         
         // last priority: move to rampart

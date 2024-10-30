@@ -47,14 +47,24 @@ public partial class StructureBuilder {
                     if (IsValidRoadPosition(x, y)) {
                         var roomX = x + spawnPosition.X;
                         var roomY = y + spawnPosition.Y;
-                        if (!terrain[new Position(roomX, roomY)].IsTerrain(Terrain.Wall))
-                        {
-                            var constructionResult = _room.Room.CreateConstructionSite<IStructureRoad>(new Position(roomX, roomY));
-                            if (constructionResult == RoomCreateConstructionSiteResult.Ok) {
-                                roadCount++;
-                                if (roadCount >= MaxConstructionSites) {
-                                    return true;
-                                }
+                        var position = new Position(roomX, roomY);
+
+                        // we won't build on walls
+                        if (terrain[position].IsTerrain(Terrain.Wall)) {
+                            continue;
+                        }
+
+                        // the linear distance is quite long. if the path to the future road is even longer than that, don't build it
+                        if (spawn.LocalPosition.LinearDistanceTo(position) <
+                            _room.Room.FindPath(spawn.RoomPosition, new RoomPosition(position, spawn.Room!.Coord)).Count()) {
+                            continue;
+                        }
+
+                        var constructionResult = _room.Room.CreateConstructionSite<IStructureRoad>(new Position(roomX, roomY));
+                        if (constructionResult == RoomCreateConstructionSiteResult.Ok) {
+                            roadCount++;
+                            if (roadCount >= MaxConstructionSites) {
+                                return true;
                             }
                         }
                     }

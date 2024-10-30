@@ -107,8 +107,23 @@ public static class MemoryUtil {
         memory.SetValue(id, path.Stringify());
     }
     
+    public static IMemoryObject GetMemory(this IStructure structure) {
+        switch (structure) {
+            case IStructureContainer c:
+                return c.GetMemory();
+            case IStructureTower t:
+                return t.GetMemory();
+            default:
+                Logger.Instance.Error("COULD NOT GET MEMORY OF STRUCTURE: " + structure);
+                return Program.Game!.Memory;
+        }
+    }
+    
     public static IMemoryObject GetMemory(this IStructureContainer container) {
         return Program.Game!.Memory.GetOrCreateObject("containers").GetOrCreateObject(container.Id);
     }
 
+    public static IMemoryObject GetMemory(this IStructureTower tower) {
+        return Program.Game!.Memory.GetOrCreateObject("towers").GetOrCreateObject(tower.Id);
+    }
 }

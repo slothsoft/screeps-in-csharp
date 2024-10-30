@@ -13,7 +13,12 @@ public static class CreepExtensions {
     public static bool MoveToAttackInSameRoom(this ICreep creep) {
         // first priority: if we already have a target, follow it
         if (creep.Memory.TryGetString(CreepTarget, out var targetId) && !string.IsNullOrEmpty(targetId)) {
-            var targetEnemy = creep.Room!.Find<ICreep>(my: false).SingleOrDefault(c => c.Id == targetId);
+            var targetEnemy = creep.Room!.Find<ICreep>(my: false).SingleOrDefault(c => c.Id.ToString() == targetId);
+            if (targetEnemy == null) {
+                // no target any more, so we killed it
+                creep.Room!.Memory.IncrementKillCount(creep.GetJobId()!);
+                creep.Memory.IncrementKillCount(creep.GetJobId()!);
+            }
             if (creep.MoveToAttack(targetEnemy)) {
                 return true;
             }
@@ -21,8 +26,8 @@ public static class CreepExtensions {
 
         // second priority: attack foes!
         var enemy = creep.Room!.Find<ICreep>(my: false).FindNearest(creep.LocalPosition);
-        if (enemy != null && creep.MoveToAttack(enemy)) {
-            return true;
+        if (enemy != null) {
+            return creep.MoveToAttack(enemy);
         }
 
         return false;
@@ -37,9 +42,12 @@ public static class CreepExtensions {
         creep.Memory.SetValue(CreepTarget, enemy.Id);
         var attackResult = creep.Attack(enemy);
         if (attackResult == CreepAttackResult.NotInRange) {
-            enemy.BetterMoveTo(enemy.RoomPosition);
-        } else if (attackResult != CreepAttackResult.Ok) {
-            enemy.LogInfo($"unexpected result when attacking {creep} ({attackResult})");
+            creep.BetterMoveTo(enemy.RoomPosition);
+            return true;
+        } 
+        if (attackResult != CreepAttackResult.Ok) {
+            creep.LogInfo($"unexpected result when attacking {creep} ({attackResult})");
+            return false;
         }
 
         // if enemy was attacked and is now done, increment kill count

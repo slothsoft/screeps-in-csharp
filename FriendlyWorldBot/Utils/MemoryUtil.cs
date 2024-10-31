@@ -2,6 +2,7 @@ using System;
 using FriendlyWorldBot.Paths;
 using FriendlyWorldBot.Rooms.Creeps;
 using FriendlyWorldBot.Rooms.Structures;
+using FriendlyWorldBot.Rooms.Upgrades;
 using ScreepsDotNet;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
@@ -84,6 +85,10 @@ public static class MemoryUtil {
     public static int GetWantedCreepsPerJob(this IRoom room, IJob job) {
         return room.Memory.GetConfigObj().GetOrCreateObject("wantedCreepsPerJob").TryGetInt(job.Id, out var result) ? result : job.WantedCreepCount;
     }
+    
+    public static void SetWantedCreepsPerJob(this IRoom room, string jobId, int newValue) {
+        room.Memory.GetConfigObj().GetOrCreateObject("wantedCreepsPerJob").SetValue(jobId, newValue);
+    }
 
     public static void IncrementKillCount(this IMemoryObject memory, string id) {
         var killCount = GetKillCount(memory);
@@ -108,8 +113,16 @@ public static class MemoryUtil {
         memory.SetValue(id, path.Stringify());
     }
     
+    public static UpgradeStatus TryGetUpgradeStatus(this IMemoryObject memory, string id) {
+        return memory.TryGetString(id, out var status) ? Enum.Parse<UpgradeStatus>(status) : UpgradeStatus.NotStartedYet;
+    }
+    
+    public static void SetValue(this IMemoryObject memory, string id, UpgradeStatus status) {
+        memory.SetValue(id, status.ToString());
+    }
+    
     public static IMemoryObject GetMemory(this IStructure structure) {
-        foreach (var type in StructureType.All) {
+        foreach (var type in StructureTypes.All) {
             if (type.IsAssignableFrom(structure)) {
                 return structure.GetMemory(type.CollectionName);
             }

@@ -251,12 +251,17 @@ public static class CreepExtensions {
             creep.MoveToTransferIntoExtension(room);
             return;
         }
-        var transferResult = creep.Transfer(spawn, ResourceType.Energy);
+        creep.MoveToTransferInto(spawn);
+    }
+    
+    internal static bool MoveToTransferInto(this ICreep creep, IStructure structure) {
+        var transferResult = creep.Transfer(structure, ResourceType.Energy);
         if (transferResult == CreepTransferResult.NotInRange) {
-            creep.BetterMoveTo(spawn.RoomPosition);
+            creep.BetterMoveTo(structure.RoomPosition);
         } else if (transferResult != CreepTransferResult.Ok && transferResult != CreepTransferResult.NotEnoughResources) {
-            creep.LogInfo($"unexpected result when transfering to {spawn} ({transferResult})");
+            creep.LogInfo($"unexpected result when transfering to {structure} ({transferResult})");
         }
+        return transferResult == CreepTransferResult.Ok;
     }
 
     internal static void MoveToTransferIntoExtension(this ICreep creep, RoomCache room) {
@@ -266,12 +271,7 @@ public static class CreepExtensions {
         if (extension == null) {
             return;
         }
-        var transferResult = creep.Transfer(extension, ResourceType.Energy);
-        if (transferResult == CreepTransferResult.NotInRange) {
-            creep.BetterMoveTo(extension.RoomPosition);
-        } else if (transferResult != CreepTransferResult.Ok && transferResult != CreepTransferResult.NotEnoughResources) {
-            creep.LogInfo($"unexpected result when depositing to {extension} ({transferResult})");
-        }
+        creep.MoveToTransferInto(extension);
     }
 
     internal static bool IsHarvester(this ICreep creep) {

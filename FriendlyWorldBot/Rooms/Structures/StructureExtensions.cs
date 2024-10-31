@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FriendlyWorldBot.Rooms.Creeps;
@@ -24,7 +25,7 @@ public static class StructureExtensions {
             return false;
         }
 
-        var enemy = attacker.FindNearestEnemy(StructureType.Tower.CollectionName);
+        var enemy = attacker.FindNearestEnemy(StructureTypes.Tower.CollectionName);
         if (enemy == null) {
             return false;
         }

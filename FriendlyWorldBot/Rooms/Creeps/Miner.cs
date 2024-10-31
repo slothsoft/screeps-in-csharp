@@ -26,7 +26,7 @@ public class Miner : IJob {
     public string Id => "miner";
     public string Icon => "\u26cf\ufe0f";
     public int WantedCreepCount => _room.Room.Find<IStructureContainer>()
-        .Select(c => c.GetMemory().TryGetString(ContainerWithSource, out var source) ? source : null)
+        .Select(c => c.GetMemory().TryGetString(ContainerKindSource, out var source) ? source : null)
         .Where(t => !string.IsNullOrWhiteSpace(t))
         .OfType<string>().Count();
     public IEnumerable<BodyPartGroup> BodyPartGroups => MinerBodyPartGroups;
@@ -43,7 +43,7 @@ public class Miner : IJob {
                 .Where(t => !string.IsNullOrWhiteSpace(t))
                 .OfType<string>().ToArray();
             var miningContainerIds = _room.Room.Find<IStructureContainer>()
-                .Where(c => c.GetMemory().TryGetString(ContainerWithSource, out var source) && !string.IsNullOrWhiteSpace(source))
+                .Where(c => c.GetMemory().TryGetString(ContainerKindSource, out var source) && !string.IsNullOrWhiteSpace(source))
                 .Select(t => t.Id.ToString()).ToList();
             miningContainerIds.RemoveRange(usedContainers);
             targetId = miningContainerIds.FirstOrDefault() ?? usedContainers.FirstOrDefault();
@@ -60,7 +60,7 @@ public class Miner : IJob {
             return;
         }
 
-        var source = target.GetMemory().TryGetString(ContainerWithSource, out var sourceId) ? _room.Sources.Single(s => s.Id == sourceId) : null;
+        var source = target.GetMemory().TryGetString(ContainerKindSource, out var sourceId) ? _room.Sources.Single(s => s.Id == sourceId) : null;
         if (source == null) {
             creep.LogError($"Could not find source for container {target.Id} in room {_room.Room.Name}");
             return;

@@ -5,7 +5,7 @@ using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
 using Xunit.Abstractions;
 
-namespace FriendlyWorldBots.Rsoms.Structures;
+namespace FriendlyWorldBots.Rooms.Structures;
 
 public class StructureBuilderTest {
     private readonly ITestOutputHelper _testOutputHelper;

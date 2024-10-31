@@ -14,6 +14,12 @@ dotnet workload install wasi-experimental
 mklink /J ...\screeps-in-csharp\FriendlyWorldBot\bin\Debug\net8.0\wasi-wasm\AppBundle\world ...AppData\Local\Screeps\scripts\...
 ```
 
+
+# General Helpers
+
+- Search query `(XXX|TODO|FIXME)` to see open tasks
+
+
 # Publish Bot
 
 To publish it in a way that can be copied to the Screeps folder:

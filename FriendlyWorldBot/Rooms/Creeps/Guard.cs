@@ -48,29 +48,14 @@ public class Guard : IJob {
         if (creep.MoveToAttackInSameRoom()) {
             return;
         }
-
         
         // third priority: collect energy from corpses or ruins?
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
             if (!creep.MoveToPickupLostResources(_room)) {
-                var tower = _room.Towers.FindNearest(creep.LocalPosition);
-                if (tower == null) return;
-                var transferResult = creep.Transfer(tower, ResourceType.Energy);
-                if (transferResult == CreepTransferResult.NotInRange) {
-                    creep.BetterMoveTo(tower.RoomPosition);
-                } else if (transferResult != CreepTransferResult.Ok && transferResult != CreepTransferResult.NotEnoughResources) {
-                    creep.LogInfo($"unexpected result when transfering to {tower} ({transferResult})");
-                }
+                MoveToDrop(creep);
             }
         } else {
-            var tower = _room.Towers.FindNearest(creep.LocalPosition);
-            if (tower == null) return;
-            var transferResult = creep.Transfer(tower, ResourceType.Energy);
-            if (transferResult == CreepTransferResult.NotInRange) {
-                creep.BetterMoveTo(tower.RoomPosition);
-            } else if (transferResult != CreepTransferResult.Ok && transferResult != CreepTransferResult.NotEnoughResources) {
-                creep.LogInfo($"unexpected result when transfering to {tower} ({transferResult})");
-            }
+            MoveToDrop(creep);
         }
         
         // last priority: move to rampart
@@ -78,5 +63,27 @@ public class Guard : IJob {
         // if (rampart != null) {
         //     creep.BetterMoveTo(rampart.RoomPosition);
         // }
+    }
+
+    private void MoveToDrop(ICreep creep) {
+        var tower = _room.Towers.FindNearest(creep.LocalPosition);
+        if (tower == null) return;
+        if (tower.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
+            var transferResult = creep.Transfer(tower, ResourceType.Energy);
+            if (transferResult == CreepTransferResult.NotInRange) {
+                creep.BetterMoveTo(tower.RoomPosition);
+                return;
+            } 
+            if (transferResult != CreepTransferResult.Ok && transferResult != CreepTransferResult.NotEnoughResources && transferResult != CreepTransferResult.Full) {
+                creep.LogInfo($"unexpected result when transfering to {tower} ({transferResult})");
+            }
+            return;
+        }
+
+        var (container, constructionSite) = StructureTypes.Graveyard.FindOrCreateConstructionSite(_room);
+        if (container != null) {
+            creep.MoveToTransferInto(container);
+        }
+
     }
 }

@@ -19,6 +19,8 @@ public interface IMemoryConstants {
     public const string RoomName = "name";
     public const string RoomNameShort = "nameShort";
     public const string RoomCreatedRoadsForLevel = "createdRoadsForLevel";
+    public const string RoomUpgrades = "upgrades";
+    public const string RoomFutureMemory = "futureMemory";
     
     public const string GameRepairStructuresAtPercent = "repairStructuresAtPercent";
     public const double GameRepairStructuresAtPercentDefault = 0.80;
@@ -27,8 +29,13 @@ public interface IMemoryConstants {
     
     public const string SpawnMain = "main";
     
-    public const string ContainerWithSource = "sourceContainer";
+    public const string ContainerKind = "kind";
+    public const string ContainerKindGraveyard = "graveyard";
+    public const string ContainerKindSource = "source";
     
     public const string TotalEnemiesKilled = "totalEnemiesKilled";
     public const string Gate = "gate";
+    
+    public const string MemoryContainers = "containers";
+    public const string MemoryTowers = "towers";
 }

@@ -7,14 +7,14 @@ public class StructureManager : IManager {
     private readonly IGame _game;
     private readonly RoomCache _room;
 
-    private readonly IDictionary<StructureType, IPurpose> _structurePurposes;
+    private readonly IDictionary<IStructureType, IPurpose> _structurePurposes;
     
     public StructureManager(IGame game, RoomCache room) {
         _game = game;
         _room = room;
 
-        _structurePurposes = new Dictionary<StructureType, IPurpose> {
-            {StructureType.Tower, new TowerPurpose()}
+        _structurePurposes = new Dictionary<IStructureType, IPurpose> {
+            {StructureTypes.Tower, new TowerPurpose()}
         };
     }
 

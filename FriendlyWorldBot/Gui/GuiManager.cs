@@ -11,8 +11,8 @@ namespace FriendlyWorldBot.Gui;
 
 public class GuiManager : IManager {
     
-    private const int RoomWidth = 50;
-    private const int RoomHeight = 50;
+    public const int RoomWidth = 50;
+    public const int RoomHeight = 50;
 
     private static readonly Color ColorYellow = new(byte.MaxValue, byte.MaxValue, 0);
     

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using FriendlyWorldBot.Gui;
+using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
 using static FriendlyWorldBot.Utils.IMemoryConstants;
 
@@ -107,5 +109,56 @@ public class RoomCache : IManager {
                 AllStructures.Remove(structure);
             }
         }
+    }
+
+    public Position? FindNextSpawnLinePosition() {
+        var spawnPos = MainSpawn?.LocalPosition;
+        if (spawnPos == null) return null;
+
+        var terrain = Room.GetTerrain();
+        const int step = 2;
+        var distance = step;
+        do {
+            var newPos = new Position(spawnPos.Value.X + distance, spawnPos.Value.Y);
+            if (newPos.X < GuiManager.RoomWidth && AllStructures.All(s => s.LocalPosition != newPos)) {
+                if (!terrain[newPos].IsTerrain(Terrain.Wall)) {
+                    return newPos;
+                }
+            }
+
+            newPos = new Position(spawnPos.Value.X - distance, spawnPos.Value.Y);
+            if (newPos.X >= 0 && AllStructures.All(s => s.LocalPosition != newPos)) {
+                if (!terrain[newPos].IsTerrain(Terrain.Wall)) {
+                    return newPos;
+                }
+            }
+
+            distance += step;
+        } while (spawnPos.Value.X + distance < GuiManager.RoomWidth && spawnPos.Value.X - distance >= 0);
+
+        return null;
+    }
+
+    public Position? FindNextSourceContainer() {
+        var spawnPos = MainSpawn?.LocalPosition;
+        if (spawnPos == null) return null;
+
+        const int step = 2;
+        var distance = step;
+        do {
+            var newPos = new Position(spawnPos.Value.X + distance, spawnPos.Value.Y);
+            if (newPos.X < GuiManager.RoomWidth && AllStructures.All(s => s.LocalPosition != newPos)) {
+                return newPos;
+            }
+
+            newPos = new Position(spawnPos.Value.X - distance, spawnPos.Value.Y);
+            if (newPos.X >= 0 && AllStructures.All(s => s.LocalPosition != newPos)) {
+                return newPos;
+            }
+
+            distance += step;
+        } while (spawnPos.Value.X + distance < GuiManager.RoomWidth && spawnPos.Value.X - distance >= 0);
+
+        return null;
     }
 }

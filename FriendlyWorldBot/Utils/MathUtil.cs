@@ -5,7 +5,7 @@ using ScreepsDotNet.API;
 namespace FriendlyWorldBot.Utils;
 
 public static class MathUtil {
-    private static readonly IDictionary<int, Position> UlamSpiral = new Dictionary<int, Position>();
+    private static readonly Dictionary<int, Position> UlamSpiral = new();
     
     public static IEnumerable<Position> ToUlamSpiral(this int expectedCount, Func<Position, bool>? isValidPosition = null!) {
         var usedIsValidPosition = isValidPosition ?? (_ => true);
@@ -31,8 +31,8 @@ public static class MathUtil {
         } else {
             var numberMinusOnePosition = CalculateUlamSpiral(number - 1);
             result = new Position(
-                numberMinusOnePosition.X + (int) Math.Sin(Math.Floor(Math.Sqrt(4 * number - 7)) * Math.PI / 2),
-                numberMinusOnePosition.Y + (int) (-Math.Cos(Math.Floor(Math.Sqrt(4 * number - 7)) * Math.PI / 2))
+                numberMinusOnePosition.X + (int) +Math.Sin(Math.Floor(Math.Sqrt(4 * number - 7)) * Math.PI / 2),
+                numberMinusOnePosition.Y + (int) -Math.Cos(Math.Floor(Math.Sqrt(4 * number - 7)) * Math.PI / 2)
             );
         }
         UlamSpiral.Add(number, result);

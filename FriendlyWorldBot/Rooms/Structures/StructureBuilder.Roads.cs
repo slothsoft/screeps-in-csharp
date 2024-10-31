@@ -55,8 +55,7 @@ public partial class StructureBuilder {
                         }
 
                         // the linear distance is quite long. if the path to the future road is even longer than that, don't build it
-                        if (spawn.LocalPosition.LinearDistanceTo(position) <
-                            _room.Room.FindPath(spawn.RoomPosition, new RoomPosition(position, spawn.Room!.Coord)).Count()) {
+                        if (spawn.LocalPosition.LinearDistanceTo(position) < _room.Room.FindWalkingPath(spawn.LocalPosition, position).Count()) {
                             continue;
                         }
 

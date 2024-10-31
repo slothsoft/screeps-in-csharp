@@ -25,6 +25,7 @@ public class RoomCache : IManager {
     public IEnumerable<IStructureExtension> Extensions => AllStructures.OfType<IStructureExtension>();
     public IEnumerable<IStructureRampart> Ramparts => AllStructures.OfType<IStructureRampart>();
     public IEnumerable<IStructureTower> Towers => AllStructures.OfType<IStructureTower>();
+    public IEnumerable<TStructure> Structures<TStructure>() => AllStructures.OfType<TStructure>();
     public IList<IStructure> AllStructures { get; } = new List<IStructure>();
     
     public IEnumerable<IStructureSpawn> SpawnsForExtensionConstruction {

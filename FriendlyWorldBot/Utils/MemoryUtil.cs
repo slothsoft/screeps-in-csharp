@@ -1,6 +1,7 @@
 using System;
 using FriendlyWorldBot.Paths;
 using FriendlyWorldBot.Rooms.Creeps;
+using FriendlyWorldBot.Rooms.Structures;
 using ScreepsDotNet;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
@@ -29,7 +30,7 @@ public static class MemoryUtil {
     }
 
     public static void CleanMemory(this IGame game) {
-        if (!game.Memory.TryGetObject("creeps", out var memoryCreeps)) {
+        if (!game.Memory.TryGetObject(CreepCollection, out var memoryCreeps)) {
             return;
         }
 
@@ -96,7 +97,7 @@ public static class MemoryUtil {
     }
 
     private static IMemoryObject GetKillCount(this IMemoryObject memory) {
-        return memory.GetConfigObj().GetOrCreateObject("killCount");
+        return memory.GetOrCreateObject("killCount");
     }
     
     public static IPath TryGetPath(this IMemoryObject memory, string id) {
@@ -108,22 +109,19 @@ public static class MemoryUtil {
     }
     
     public static IMemoryObject GetMemory(this IStructure structure) {
-        switch (structure) {
-            case IStructureContainer c:
-                return c.GetMemory();
-            case IStructureTower t:
-                return t.GetMemory();
-            default:
-                Logger.Instance.Error("COULD NOT GET MEMORY OF STRUCTURE: " + structure);
-                return Program.Game!.Memory;
+        foreach (var type in StructureType.All) {
+            if (type.IsAssignableFrom(structure)) {
+                return structure.GetMemory(type.CollectionName);
+            }
         }
-    }
-    
-    public static IMemoryObject GetMemory(this IStructureContainer container) {
-        return Program.Game!.Memory.GetOrCreateObject("containers").GetOrCreateObject(container.Id);
+        
+        Logger.Instance.Error("COULD NOT GET MEMORY OF STRUCTURE: " + structure);
+        return Program.Game!.Memory;
     }
 
-    public static IMemoryObject GetMemory(this IStructureTower tower) {
-        return Program.Game!.Memory.GetOrCreateObject("towers").GetOrCreateObject(tower.Id);
+    public static IMemoryObject GetMemory<TObject>(this TObject obj, string collectionName) 
+        where TObject : IWithId, IRoomObject
+    {
+        return Program.Game!.Memory.GetOrCreateObject(collectionName).GetOrCreateObject(obj.Id);
     }
 }

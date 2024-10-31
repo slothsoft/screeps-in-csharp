@@ -1,6 +1,7 @@
 using System.Linq;
 using FriendlyWorldBot.Rooms.Structures;
 using FriendlyWorldBot.Utils;
+using ScreepsDotNet;
 using ScreepsDotNet.API.World;
 using static FriendlyWorldBot.Utils.IMemoryConstants;
 
@@ -10,57 +11,50 @@ public static class CreepExtensions {
     
     // ATTACK - https://docs.screeps.com/api/#Creep.attack
 
-    public static bool MoveToAttackInSameRoom(this ICreep creep) {
-        // first priority: if we already have a target, follow it
-        if (creep.Memory.TryGetString(CreepTarget, out var targetId) && !string.IsNullOrEmpty(targetId)) {
-            var targetEnemy = creep.Room!.Find<ICreep>(my: false).SingleOrDefault(c => c.Id.ToString() == targetId);
-            if (targetEnemy == null) {
-                // no target any more, so we killed it
-                creep.Room!.Memory.IncrementKillCount(creep.GetJobId()!);
-                creep.Memory.IncrementKillCount(creep.GetJobId()!);
-            }
-            if (creep.MoveToAttack(targetEnemy)) {
-                return true;
-            }
-        }
+    public static bool MoveToAttackInSameRoom(this ICreep attacker)
+    {
+        var enemy = attacker.FindNearestEnemy(CreepCollection);
 
-        // second priority: attack foes!
-        var enemy = creep.Room!.Find<ICreep>(my: false).FindNearest(creep.LocalPosition);
-        if (enemy != null) {
-            return creep.MoveToAttack(enemy);
-        }
-
-        return false;
-    }
-
-    public static bool MoveToAttack(this ICreep creep, ICreep? enemy) {
         if (enemy == null) {
-            creep.Memory.SetValue(CreepTarget, string.Empty);
             return false;
         }
-
-        creep.Memory.SetValue(CreepTarget, enemy.Id);
-        var attackResult = creep.Attack(enemy);
-        if (attackResult == CreepAttackResult.NotInRange) {
-            creep.BetterMoveTo(enemy.RoomPosition);
+        var result = attacker.Attack(enemy);
+        if (result == CreepAttackResult.NotInRange) {
+            attacker.BetterMoveTo(enemy.RoomPosition);
+            attacker.SetUserData(enemy);
             return true;
         } 
-        if (attackResult != CreepAttackResult.Ok) {
-            creep.LogInfo($"unexpected result when attacking {creep} ({attackResult})");
+        if (result != CreepAttackResult.Ok) {
             return false;
         }
-
-        // if enemy was attacked and is now done, increment kill count
-        if (!enemy.Exists) {
-            var jobId = creep.GetJobId();
-            if (jobId != null) {
-                creep.Room!.Memory.IncrementKillCount(jobId);
-                creep.Memory.IncrementKillCount(jobId);
-            }
-        }
-
+        attacker.SetUserData(enemy);
         return true;
     }
+    
+    public static ICreep? FindNearestEnemy<TObject>(this TObject attacker, string memoryCollectionName) 
+        where TObject : IWithId, IRoomObject
+    {
+        // first priority: if we already have a target, follow it
+        var enemy = attacker.GetUserData<ICreep>();
+        if (enemy != null) {
+            if (!enemy.Exists) {
+                // enemy died, so increment kill count
+                attacker.GetMemory(memoryCollectionName).IncrementKillCount(memoryCollectionName); // creep/tower remembers what it kills
+                attacker.Room!.Memory.IncrementKillCount(memoryCollectionName); // room remembers too
+                Program.Game!.Memory.IncrementKillCount(memoryCollectionName); // game remembers too
+                enemy = null;
+                attacker.SetUserData<ICreep>(null);
+            } else if (!Equals(enemy.Room, attacker.Room)) {
+                // enemy left the room
+                enemy = null;
+                attacker.SetUserData<ICreep>(null);
+            }
+        }
+        // second priority: attack foes!
+        enemy ??= attacker.Room!.Find<ICreep>(my: false).FindNearest(attacker.LocalPosition);
+        return enemy;
+    }
+
 
     // BUILD - https://docs.screeps.com/api/#Creep.build
 

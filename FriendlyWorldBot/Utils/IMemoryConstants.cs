@@ -9,6 +9,7 @@ public interface IMemoryConstants {
     public const string CreepJob = "job";
     public const string CreepSuicide = "suicide";
     public const string CreepPioneerLog = "pioneerLog";
+    public const string CreepCollection = "creeps";
     
     public const string FlagSpawnCoordinate = "spawnCoordinate";
     

@@ -15,7 +15,6 @@ public class WorldBot : IBot {
         _game = game;
         
         // Clean memory once on startup
-        // (Since our IVM will reset periodically, this will run frequently enough without us needing to schedule it properly)
         _game.CleanMemory();
     }
 

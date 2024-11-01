@@ -16,6 +16,10 @@ public static class PathExtensions {
         {
             return Line.Pathify(someString);
         } 
+        if (someString.Contains(Rectangle.SeparatorTo))
+        {
+            return Rectangle.Pathify(someString);
+        } 
         return Point.Pathify(someString);
     }
 }

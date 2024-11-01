@@ -33,6 +33,8 @@ public interface IMemoryConstants {
     public const string ContainerKindGraveyard = "graveyard";
     public const string ContainerKindSource = "source";
     
+    public const string ConfigPreventExtensionsFromSpawningOn = "preventExtensionsFromSpawningOn";
+    
     public const string TotalEnemiesKilled = "totalEnemiesKilled";
     public const string Gate = "gate";
     

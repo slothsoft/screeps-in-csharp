@@ -1,3 +1,4 @@
+using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
 
 namespace FriendlyWorldBot.Rooms.Structures;
@@ -9,4 +10,5 @@ public interface IStructureType {
     string CollectionName { get; }
     string? Kind { get; }
     bool IsAssignableFrom(IStructure structure);
+    Position? FindNextPosition(RoomCache room);
 }

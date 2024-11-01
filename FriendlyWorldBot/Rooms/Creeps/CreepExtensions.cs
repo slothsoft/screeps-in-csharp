@@ -55,7 +55,6 @@ public static class CreepExtensions {
         return enemy;
     }
 
-
     // BUILD - https://docs.screeps.com/api/#Creep.build
 
     public static bool MoveToBuild(this ICreep creep, IConstructionSite target) {

@@ -42,6 +42,7 @@ public class RoomManager : IManager {
             var buildStructure = _cache.AllStructures.FirstOrDefault(s => s.LocalPosition == futureMemoryPosition);
             if (buildStructure != null) {
                 // fill the structure with the given memory
+                Logger.Instance.Debug("Set memory for buildStructure: " + buildStructure.Id);
                 var currentMemory = buildStructure.GetMemory();
                 var futureMemory = _cache.Room.FetchFutureMemory(futureMemoryPosition);
                 foreach (var futureMemoryKey in futureMemory.Keys) {

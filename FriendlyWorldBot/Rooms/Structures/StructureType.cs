@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
@@ -12,8 +12,8 @@ namespace FriendlyWorldBot.Rooms.Structures;
 /// The structure struct has some additional functionality fot the IStructureType.
 /// </summary>
 public static class StructureTypes {
-    internal static IList<IStructureType>? _all;
-    public static IEnumerable<IStructureType> All => _all!;
+    internal static IList<IStructureType> _all = new List<IStructureType>();
+    public static IEnumerable<IStructureType> All => _all.ToImmutableArray();
    
     public static readonly StructureType<IStructureTower> Tower = new("towers", s =>{
         Logger.Instance.Error("Cannot create towers automatically");
@@ -23,7 +23,7 @@ public static class StructureTypes {
     // these are all kind of containers
     public static readonly StructureType<IStructureContainer> Container = new(MemoryContainers, room => room.FindNextSpawnLinePosition());
     public static readonly StructureType<IStructureContainer> Graveyard = new(MemoryContainers, room => room.FindNextSpawnLinePosition(), ContainerKindGraveyard);
-    public static readonly StructureType<IStructureContainer> Source = new(MemoryContainers, room => room.FindNextSourceContainer(), ContainerKindSource);
+    public static readonly StructureType<IStructureContainer> Source = new(MemoryContainers, room => room.FindNextSourceContainerPosition(), ContainerKindSource);
 }
 
 public struct StructureType<TStructure> : IStructureType
@@ -39,7 +39,6 @@ public struct StructureType<TStructure> : IStructureType
         _nextPosition = nextPosition;
         _expectedKind = expectedKind;
         
-        StructureTypes._all = new List<IStructureType>();
         StructureTypes._all.Add(this);
     }
 
@@ -51,47 +50,13 @@ public struct StructureType<TStructure> : IStructureType
             return false;
         }
         if (_expectedKind != null) {
-            if (structure.GetMemory().TryGetString(ContainerKind, out var actualKind)) {
+            if (structure.GetMemory(CollectionName).TryGetString(ContainerKind, out var actualKind)) {
                 return actualKind == _expectedKind;
             }
             return false;
         }
         return true;
     }
-    
-    // TODO: maybe these methods would be more comfortable as IRoom or RoomCache extensions?
-    
-    public RoomCreateConstructionSiteResult CreateConstructionSite(IRoom room, Position position)
-    {
-        if (_expectedKind == null) {
-            return room.CreateConstructionSite<TStructure>(position);
-        }
-        var futureMemory = new Dictionary<string, string> {
-            { ContainerKind, _expectedKind },
-        };
-        return room.CreateConstructionSite<TStructure>(position, futureMemory);
-    }
-    
-    public IEnumerable<TStructure> FindAll(RoomCache room) {
-        return room.AllStructures.Where(IsAssignableFrom).OfType<TStructure>();
-    }
-    
-    public (TStructure?, IConstructionSite?) FindOrCreateConstructionSite(RoomCache room) {
-        // find an existing structure
-        var resultStructure = FindAll(room).FirstOrDefault();
-        if (resultStructure != null) {
-            return (resultStructure, null);
-        }
-        // find a good place for placement
-        var position = _nextPosition(room);
-        if (position == null) return (null, null);
-        
-        // create a new structure
-        var resultConstruction = CreateConstructionSite(room.Room, position.Value);
-        if (resultConstruction == RoomCreateConstructionSiteResult.Ok) {
-            var constructionSite = room.Room.LookForAt<IConstructionSite>(position.Value).FirstOrDefault();
-            return (null, constructionSite);
-        }
-        return (null, null);
-    }
+
+    public Position? FindNextPosition(RoomCache room) => _nextPosition(room);
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FriendlyWorldBot.Paths;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
@@ -16,6 +17,12 @@ public partial class StructureBuilder
         var possibleExtensions = GetPossibleExtensionCount(controller.Level);
         var existingExtensions = _room.Extensions.Count();
         var showExtensions = _game.GetConfigBool("showExtensions");
+        
+        var preventExtensionsFromSpawningOnPath = _room.Room.Memory.GetConfigObj().TryGetPath(ConfigPreventExtensionsFromSpawningOn);
+        var preventExtensionsFromSpawningOn = preventExtensionsFromSpawningOnPath.ToPositions().ToArray();
+        if (preventExtensionsFromSpawningOn.Length == 0) {
+            _room.Room.Memory.GetConfigObj().SetValue(ConfigPreventExtensionsFromSpawningOn, EmptyPath.Instance);
+        }
 
         var somethingWasBuild = false;
         if (possibleExtensions > existingExtensions || showExtensions) {
@@ -44,7 +51,14 @@ public partial class StructureBuilder
                         
                         if (isExtension || isExtensionInConstruction) {
                             continue;
-                        } 
+                        }
+
+                        // we have manually excluded this position
+                        if (preventExtensionsFromSpawningOn.Contains(position)) {
+                            newAdditionalExtensions++;
+                            continue;
+                        }
+                        
                         // there is another object on this position
                         if (stuffAtPosition.Length > 0) {
                             newAdditionalExtensions++;
@@ -61,6 +75,9 @@ public partial class StructureBuilder
                         if (_room.Room.CreateConstructionSite<IStructureExtension>(position) == RoomCreateConstructionSiteResult.Ok)
                         {
                             somethingWasBuild = true;
+                        } else {
+                            // if not, we need to skip this field next round 
+                            newAdditionalExtensions++;
                         }
                     }
                 }

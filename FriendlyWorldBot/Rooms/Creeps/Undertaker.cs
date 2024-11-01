@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using FriendlyWorldBot.Rooms.Structures;
 using ScreepsDotNet.API.World;
 
 namespace FriendlyWorldBot.Rooms.Creeps;
@@ -32,7 +33,10 @@ public class Undertaker : IJob {
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
             creep.MoveToPickupLostResources(_room);
         } else {
-            creep.MoveToTransferIntoStorage(_room);
+            var (container, constructionSite) = _room.FindOrCreateConstructionSite<IStructureContainer>(StructureTypes.Graveyard);
+            if (container != null) {
+                creep.MoveToTransferInto(container);
+            }
         }
     }
 }

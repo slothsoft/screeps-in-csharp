@@ -31,21 +31,33 @@ public static class MemoryUtil {
     }
 
     public static void CleanMemory(this IGame game) {
-        if (!game.Memory.TryGetObject(CreepCollection, out var memoryCreeps)) {
-            return;
-        }
-
         // Delete all creeps in memory that no longer exist
-        var clearedCount = 0;
-        foreach (var creepName in memoryCreeps.Keys) {
-            if (!game.Creeps.ContainsKey(creepName)) {
-                memoryCreeps.ClearValue(creepName);
-                clearedCount++;
+        var clearedCreepsCount = 0;
+        game.Memory.TryGetObject(CreepCollection, out var memoryCreeps);
+        if (memoryCreeps != null) {
+            foreach (var creepName in memoryCreeps.Keys) {
+                if (!game.Creeps.ContainsKey(creepName)) {
+                    memoryCreeps.ClearValue(creepName);
+                    clearedCreepsCount++;
+                }
+            }
+        }
+        
+        // Delete all structures in memory that no longer exist
+        var clearedStructuresCount = 0;
+        foreach (var structureType in StructureTypes.All) {
+            if (game.Memory.TryGetObject(structureType.CollectionName, out var memoryStructures)) {
+                foreach (var structureId in memoryStructures.Keys) {
+                    if (!game.Structures.ContainsKey(structureId)) {
+                        memoryStructures.ClearValue(structureId);
+                        clearedStructuresCount++;
+                    }
+                }
             }
         }
 
-        if (clearedCount > 0) {
-            Logger.Instance.Debug($"Cleared {clearedCount} dead creeps from memory");
+        if (clearedCreepsCount > 0 || clearedStructuresCount > 0) {
+            Logger.Instance.Debug($"Cleared {clearedCreepsCount} dead creeps and {clearedStructuresCount} ruined structures from memory");
         }
     }
 
@@ -74,7 +86,7 @@ public static class MemoryUtil {
         return game.Memory.GetConfigObj().TryGetBool(id, out var result) && result;
     }
     
-    private static IMemoryObject GetConfigObj(this IMemoryObject memory) {
+    public static IMemoryObject GetConfigObj(this IMemoryObject memory) {
         return memory.GetOrCreateObject("config");
     }
 
@@ -106,7 +118,7 @@ public static class MemoryUtil {
     }
     
     public static IPath TryGetPath(this IMemoryObject memory, string id) {
-        return memory.TryGetString(id, out var path) ? EmptyPath.Instance :  path!.Pathify();
+        return memory.TryGetString(id, out var path) ? path!.Pathify() : EmptyPath.Instance;
     }
     
     public static void SetValue(this IMemoryObject memory, string id, IPath path) {

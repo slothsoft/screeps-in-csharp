@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FriendlyWorldBot.Rooms.Structures;
 using ScreepsDotNet.API.World;
 
 namespace FriendlyWorldBot.Rooms.Creeps;
@@ -26,7 +27,7 @@ public class Harvester : IJob {
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
             creep.MoveToHarvestInRoom(_room);
         } else {
-            creep.MoveToTransferIntoStorage(_room);
+            creep.MoveToStoreWithCache(_room, StorageTypes.Spawn, StorageTypes.Extensions);
         }
     }
 }

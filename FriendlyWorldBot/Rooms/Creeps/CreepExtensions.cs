@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using FriendlyWorldBot.Rooms.Structures;
 using FriendlyWorldBot.Utils;
@@ -8,6 +9,58 @@ using static FriendlyWorldBot.Utils.IMemoryConstants;
 namespace FriendlyWorldBot.Rooms.Creeps;
 
 public static class CreepExtensions {
+    
+    internal static bool MoveToStoreWithCache(this ICreep creep, RoomCache room, params IStorageType[] storageTypes) {
+        IRoomObject? target = null;
+        if (creep.Memory.TryGetString(CreepTarget, out var targetId) && !string.IsNullOrWhiteSpace(targetId)) {
+            target = room.Room.Find<IRoomObject>().Where(o => o is IWithId).SingleOrDefault(o => ((IWithId) o).Id.ToString() == targetId);
+        }
+
+        bool? successful = false;
+        if (target == null) {
+            (IRoomObject? possibleTarget, successful) = (null, null);
+            foreach (var storageType in storageTypes) {
+                (possibleTarget, successful) = creep.MoveToStorageType(room, storageType);
+                if (possibleTarget == null) continue; // no target found, so just move on
+                break; // we have a target - no matter what the result is, we can stop searching
+            }
+            if (successful ?? false) {
+                target = possibleTarget;
+            }
+        }
+
+        if (creep.Store.GetFreeCapacity() == 0) {
+            // if the creep is empty, we can remove the target
+            target = null;
+        }
+        
+        creep.Memory.SetValue(CreepTarget, target == null? string.Empty : ((IWithId)target).Id.ToString());
+        return successful ?? false;
+    }
+    
+    internal static bool MoveToStore(this ICreep creep, RoomCache room, params IStorageType[] storageTypes) {
+        foreach (var storageType in storageTypes) {
+            var (target, succcesfull) = creep.MoveToStorageType(room, storageType);
+            if (target == null) continue; // no target found, so just move on
+            return succcesfull ?? false;
+        }
+        return false;
+    }
+    
+    private static (IRoomObject? Target, bool? Successful) MoveToStorageType(this ICreep creep, RoomCache room, IStorageType storageType) {
+        var target = storageType.FindBestInRoom(creep, room);
+        if (target == null) return (target, null);
+        
+        var result = storageType.Store(creep, target, ResourceType.Energy);
+        if (result == (int) CreepTransferResult.NotInRange) {
+            creep.BetterMoveTo(target.RoomPosition);
+            return (target, true);
+        }
+        if (result != (int) CreepTransferResult.Ok) {
+            creep.LogInfo($"unexpected result when transfering to {target} ({result})");
+        }
+        return (target, result == (int) CreepTransferResult.Ok);
+    }
     
     // ATTACK - https://docs.screeps.com/api/#Creep.attack
 
@@ -243,7 +296,8 @@ public static class CreepExtensions {
             .Where(s => s.Id != mainSourceId)
             .FindNearest(creep.LocalPosition);
     }
-
+    
+    [Obsolete("Use MoveToStoreWithCache() or MoveToStore() instead!")]
     internal static void MoveToTransferIntoStorage(this ICreep creep, RoomCache room) {
         var spawn = room.Spawns.FindNearest(creep.LocalPosition);
         if (spawn == null || spawn.Store.GetFreeCapacity(ResourceType.Energy) == 0) {

@@ -25,11 +25,17 @@ public class Logger
 
     public void Info(string message) => Log(LoggerSeverity.Info, message);
 
-    internal void Log(LoggerSeverity severity, string message)
+    private void Log(LoggerSeverity severity, string message) => Log(new LogEntry(severity, message));
+    
+    internal void Log(LogEntry logEntry)
     {
-        if (severity >= Severity)
-        {
-            Console.WriteLine(message);
+        if (logEntry.Severity >= Severity) {
+            var roomPrefix = string.Empty;
+            if (logEntry.Room != null) {
+                roomPrefix = logEntry.Room.Memory.TryGetString(IMemoryConstants.RoomNameShort, out var name) ? name : logEntry.Room.Name;
+            }
+            var creepPrefix = logEntry.Creep == null ? string.Empty : $"[{logEntry.Creep.Name}] ";
+            Console.WriteLine(roomPrefix + creepPrefix + logEntry.Message);
         }
     }
 }

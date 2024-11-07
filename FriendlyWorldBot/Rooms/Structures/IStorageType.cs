@@ -10,8 +10,8 @@ public interface IStorageType {
     IRoomObject? FindBestInRoom(ICreep storageWorker, RoomCache room);
     
     bool CanTakeOut(ResourceType resourceType);
-    int TakeOut(ICreep storageWorker, IRoomObject target, ResourceType resourceType);
+    bool TakeOut(ICreep storageWorker, IRoomObject target, ResourceType resourceType);
     
     bool CanStore(ResourceType resourceType);
-    int Store(ICreep storageWorker, IRoomObject target, ResourceType resourceType);
+    bool Store(ICreep storageWorker, IRoomObject target, ResourceType resourceType);
 }

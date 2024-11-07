@@ -40,4 +40,6 @@ public interface IMemoryConstants {
     
     public const string MemoryContainers = "containers";
     public const string MemoryTowers = "towers";
+    public const string MemorySpawns = "spawns";
+    public const string MemoryExtensions = "extensions";
 }

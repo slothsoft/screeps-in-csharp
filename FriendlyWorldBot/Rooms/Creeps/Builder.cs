@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API.World;
@@ -82,7 +83,7 @@ public class Builder : IJob {
         } else {
             // find new broken structures if the room doesn't have a list anymore
             var repairStructuresAtPercent = _game.Memory.TryGetDouble(GameRepairStructuresAtPercent, out var vs) ? vs : GameRepairStructuresAtPercentDefault;
-            var brokenStructures = _room.Room.Find<IStructure>()
+            var brokenStructures = _room.AllStructures
                 .Where(s => s is not IStructureController)
                 .Where(s => s is IStructureWall or IStructureRampart
                     ? s.Hits <= s.HitsMax * repairWallsAtPercent // walls are repaired only when they are REALLY critical
@@ -106,12 +107,13 @@ public class Builder : IJob {
     }
 
     private bool RunInRepairMode(ICreep creep, string targetId, double repairWallsAtPercent) {
-        var structure = _game.Structures.Values.SingleOrDefault(s => s.Id.ToString() == targetId);
+        var structure = _room.AllStructures.SingleOrDefault(s => Equals(s.Id.ToString(), targetId));
         if (structure != null) {
             RunInRepairMode(creep, structure, repairWallsAtPercent);
             return true;
         } 
         // remove the broken ID
+        creep.LogError("Could not find structure " + targetId);
         creep.Memory.SetValue(CreepTarget, string.Empty);
         return false;
     }

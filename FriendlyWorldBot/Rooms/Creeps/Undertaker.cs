@@ -33,7 +33,7 @@ public class Undertaker : IJob {
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
             creep.MoveToPickupLostResources(_room);
         } else {
-            var (container, constructionSite) = _room.FindOrCreateConstructionSite<IStructureContainer>(StructureTypes.Graveyard);
+            var (container, constructionSite) = _room.FindOrCreateConstructionSite<IStructureContainer>(StructureTypes.GraveyardContainer);
             if (container != null) {
                 creep.MoveToTransferInto(container);
             }

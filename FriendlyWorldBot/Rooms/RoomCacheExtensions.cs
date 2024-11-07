@@ -79,7 +79,7 @@ public static class RoomCacheExtensions {
         return room.AllStructures.Where(structureType.IsAssignableFrom).OfType<TStructure>();
     }
     
-    public static (TStructure?, IConstructionSite?) FindOrCreateConstructionSite<TStructure>(this RoomCache roomCache, IStructureType structureType) 
+    public static (TStructure?, IConstructionSite?) FindOrCreateConstructionSite<TStructure>(this RoomCache roomCache, AutoBuildStructureType<TStructure> structureType) 
         where TStructure : class, IStructure 
     {
         // find an existing structure

@@ -80,7 +80,7 @@ public class Guard : IJob {
             return;
         }
 
-        var (container, constructionSite) = _room.FindOrCreateConstructionSite<IStructureContainer>(StructureTypes.Graveyard);
+        var (container, constructionSite) = _room.FindOrCreateConstructionSite<IStructureContainer>(StructureTypes.GraveyardContainer);
         if (container != null) {
             creep.MoveToTransferInto(container);
         }

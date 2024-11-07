@@ -10,5 +10,8 @@ public interface IStructureType {
     string CollectionName { get; }
     string? Kind { get; }
     bool IsAssignableFrom(IStructure structure);
+}
+
+public interface IWithAutoBuild {
     Position? FindNextPosition(RoomCache room);
 }

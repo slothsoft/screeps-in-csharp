@@ -48,18 +48,15 @@ public static class CreepExtensions {
     }
     
     private static (IRoomObject? Target, bool? Successful) MoveToStorageType(this ICreep creep, RoomCache room, IStorageType storageType) {
+        if (!storageType.CanStore(ResourceType.Energy)) {
+            creep.LogError($"{storageType} cannot be stored into");
+            return (null, null);
+        }
         var target = storageType.FindBestInRoom(creep, room);
         if (target == null) return (target, null);
         
         var result = storageType.Store(creep, target, ResourceType.Energy);
-        if (result == (int) CreepTransferResult.NotInRange) {
-            creep.BetterMoveTo(target.RoomPosition);
-            return (target, true);
-        }
-        if (result != (int) CreepTransferResult.Ok) {
-            creep.LogInfo($"unexpected result when transfering to {target} ({result})");
-        }
-        return (target, result == (int) CreepTransferResult.Ok);
+        return (target, result);
     }
     
     // ATTACK - https://docs.screeps.com/api/#Creep.attack
@@ -307,8 +304,8 @@ public static class CreepExtensions {
         creep.MoveToTransferInto(spawn);
     }
     
-    internal static bool MoveToTransferInto(this ICreep creep, IStructure structure) {
-        var transferResult = creep.Transfer(structure, ResourceType.Energy);
+    internal static bool MoveToTransferInto(this ICreep creep, IStructure structure, ResourceType resourceType = ResourceType.Energy) {
+        var transferResult = creep.Transfer(structure, resourceType);
         if (transferResult == CreepTransferResult.NotInRange) {
             creep.BetterMoveTo(structure.RoomPosition);
         } else if (transferResult != CreepTransferResult.Ok && transferResult != CreepTransferResult.NotEnoughResources) {

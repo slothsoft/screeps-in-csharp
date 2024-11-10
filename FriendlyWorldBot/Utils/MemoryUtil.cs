@@ -133,6 +133,15 @@ public static class MemoryUtil {
         memory.SetValue(id, status.ToString());
     }
     
+    public static dynamic TryGetAny(this IMemoryObject memory, string id) {
+        if (memory.TryGetString(id, out var s)) return s;
+        if (memory.TryGetInt(id, out var i)) return i;
+        if (memory.TryGetBool(id, out var b)) return b;
+        if (memory.TryGetDouble(id, out var d)) return d;
+        if (memory.TryGetObject(id, out var o)) return o;
+        return string.Empty;
+    }
+    
     public static IMemoryObject GetMemory(this IStructure structure) {
         foreach (var type in StructureTypes.All) {
             if (type.IsAssignableFrom(structure)) {
@@ -145,8 +154,8 @@ public static class MemoryUtil {
     }
 
     public static IMemoryObject GetMemory<TObject>(this TObject obj, string collectionName) 
-        where TObject : IWithId, IRoomObject
-    {
-        return Program.Game!.Memory.GetOrCreateObject(collectionName).GetOrCreateObject(obj.Id);
+        where TObject : IWithId, IRoomObject {
+        var id = obj is IWithName s ? s.Name : obj.Id;
+        return Program.Game!.Memory.GetOrCreateObject(collectionName).GetOrCreateObject(id);
     }
 }

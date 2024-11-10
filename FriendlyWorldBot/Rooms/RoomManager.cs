@@ -39,16 +39,18 @@ public class RoomManager : IManager {
 
         // check if any of the structures for the future position was filled
         foreach (var futureMemoryPosition in _cache.Room.FetchFutureMemoryPositions()) {
-            var buildStructure = _cache.AllStructures.FirstOrDefault(s => s.LocalPosition == futureMemoryPosition);
-            if (buildStructure != null) {
+            foreach (var buildStructure in _cache.AllStructures.Where(s => s is not IStructureRoad).Where(s => s.LocalPosition == futureMemoryPosition)) {
                 // fill the structure with the given memory
                 Logger.Instance.Debug("Set memory for buildStructure: " + buildStructure.Id);
                 var currentMemory = buildStructure.GetMemory();
                 var futureMemory = _cache.Room.FetchFutureMemory(futureMemoryPosition);
                 foreach (var futureMemoryKey in futureMemory.Keys) {
+                    Logger.Instance.Debug("  Copying key " + futureMemoryKey);
                     if (futureMemory.TryGetString(futureMemoryKey, out var value)) {
                         currentMemory.SetValue(futureMemoryKey, value);
+                        continue;
                     }
+                    _cache.Room.LogError("Could not find key " + futureMemoryKey);
                 }
                 // now remove the future memory once and for all
                 _cache.Room.Memory.GetOrCreateObject(RoomFutureMemory).ClearValue(new Point(futureMemoryPosition.X, futureMemoryPosition.Y).Stringify());

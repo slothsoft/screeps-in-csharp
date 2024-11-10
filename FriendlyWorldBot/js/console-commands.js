@@ -18,3 +18,10 @@ global.showPaths = function (show = true){
     Memory.config.showPaths = show
     return true;
 }
+
+global.showStructureInfo = function (show = ""){
+    // used in StructureInfoVisualizer
+    if (!Memory.config) Memory.config = {}
+    Memory.config.displayStructureInfo = show
+    return true;
+}

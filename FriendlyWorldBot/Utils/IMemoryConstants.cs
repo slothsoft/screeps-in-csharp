@@ -21,11 +21,14 @@ public interface IMemoryConstants {
     public const string RoomCreatedRoadsForLevel = "createdRoadsForLevel";
     public const string RoomUpgrades = "upgrades";
     public const string RoomFutureMemory = "futureMemory";
+    public const string RoomDisplayStructureInfo = "displayStructureInfo";
     
     public const string GameRepairStructuresAtPercent = "repairStructuresAtPercent";
     public const double GameRepairStructuresAtPercentDefault = 0.80;
     public const string GameRepairWallsAtPercent = "repairWallsAtPercent";
     public const double GameRepairWallsAtPercentDefault = 0.00001; // should be around 3000
+    
+    public const string StructureName = "name";
     
     public const string SpawnMain = "main";
     

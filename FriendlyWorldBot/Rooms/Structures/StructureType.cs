@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
@@ -14,6 +15,8 @@ namespace FriendlyWorldBot.Rooms.Structures;
 public static class StructureTypes {
     internal static IList<IStructureType> _all = new List<IStructureType>();
     public static IEnumerable<IStructureType> All => _all.ToImmutableArray();
+
+    public static IStructureType? FetchType(this IStructure structure) => All.FirstOrDefault(a => a.IsAssignableFrom(structure)); 
     
     public static readonly StructureType<IStructureSpawn> Spawn = new(MemorySpawns);
     public static readonly StructureType<IStructureExtension> Extension = new(IMemoryConstants.MemoryExtensions);
@@ -24,6 +27,14 @@ public static class StructureTypes {
     public static readonly AutoBuildStructureType<IStructureContainer> Container = new(MemoryContainers, room => room.FindNextSpawnLinePosition());
     public static readonly AutoBuildStructureType<IStructureContainer> GraveyardContainer = new(MemoryContainers, room => room.FindNextSpawnLinePosition(), ContainerKindGraveyard);
     public static readonly AutoBuildStructureType<IStructureContainer> SourceContainer = new(MemoryContainers, room => room.FindNextSourceContainerPosition(), ContainerKindSource);
+    
+    public static IEnumerable<ResourceType> ContainedResourceTypes(this IStructure structure) {
+        if (structure is IWithStore withStore) {
+            foreach (var resourceType in Enum.GetValues<ResourceType>()) {
+                if (withStore.Store[resourceType] > 0) yield return resourceType;
+            }
+        }
+    }
 }
 
 public record AutoBuildStructureType<TStructure>(string CollectionName, Func<RoomCache, Position?> NextPosition, string? ExpectedKind = null) 

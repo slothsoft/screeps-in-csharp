@@ -19,7 +19,7 @@ public static class RoomCacheExtensions {
         var distance = step;
         do {
             var newPos = new Position(spawnPos.Value.X + distance, spawnPos.Value.Y);
-            if (newPos.X < GuiManager.RoomWidth && roomCache.AllStructures.All(s => s.LocalPosition != newPos)) {
+            if (newPos.X < IGuiConstants.RoomWidth && roomCache.AllStructures.All(s => s.LocalPosition != newPos)) {
                 if (!terrain[newPos].IsTerrain(Terrain.Wall)) {
                     return newPos;
                 }
@@ -33,7 +33,7 @@ public static class RoomCacheExtensions {
             }
 
             distance += step;
-        } while (spawnPos.Value.X + distance < GuiManager.RoomWidth && spawnPos.Value.X - distance >= 0);
+        } while (spawnPos.Value.X + distance < IGuiConstants.RoomWidth && spawnPos.Value.X - distance >= 0);
 
         return null;
     }
@@ -46,7 +46,7 @@ public static class RoomCacheExtensions {
         var distance = step;
         do {
             var newPos = new Position(spawnPos.Value.X + distance, spawnPos.Value.Y);
-            if (newPos.X < GuiManager.RoomWidth && roomCache.AllStructures.All(s => s.LocalPosition != newPos)) {
+            if (newPos.X < IGuiConstants.RoomWidth && roomCache.AllStructures.All(s => s.LocalPosition != newPos)) {
                 return newPos;
             }
 
@@ -56,7 +56,7 @@ public static class RoomCacheExtensions {
             }
 
             distance += step;
-        } while (spawnPos.Value.X + distance < GuiManager.RoomWidth && spawnPos.Value.X - distance >= 0);
+        } while (spawnPos.Value.X + distance < IGuiConstants.RoomWidth && spawnPos.Value.X - distance >= 0);
 
         return null;
     }

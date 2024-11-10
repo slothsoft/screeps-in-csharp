@@ -29,10 +29,11 @@ public interface IMemoryConstants {
     public const double GameRepairWallsAtPercentDefault = 0.00001; // should be around 3000
     
     public const string StructureName = "name";
+    public const string StructureKind = "kind";
     
     public const string SpawnMain = "main";
+    public const string SpawnClosestPointOfSource= "closestPointOfSource";
     
-    public const string ContainerKind = "kind";
     public const string ContainerKindGraveyard = "graveyard";
     public const string ContainerKindSource = "source";
     

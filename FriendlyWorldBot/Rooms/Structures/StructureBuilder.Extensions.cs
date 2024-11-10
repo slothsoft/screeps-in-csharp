@@ -18,7 +18,7 @@ public partial class StructureBuilder
         var existingExtensions = _room.Extensions.Count();
         var showExtensions = _game.GetConfigBool("showExtensions");
         
-        var preventExtensionsFromSpawningOnPath = _room.Room.Memory.GetConfigObj().TryGetPath(ConfigPreventExtensionsFromSpawningOn);
+        var preventExtensionsFromSpawningOnPath = _room.Room.Memory.GetConfigObj().GetPath(ConfigPreventExtensionsFromSpawningOn);
         var preventExtensionsFromSpawningOn = preventExtensionsFromSpawningOnPath.ToPositions().ToArray();
         if (preventExtensionsFromSpawningOn.Length == 0) {
             _room.Room.Memory.GetConfigObj().SetValue(ConfigPreventExtensionsFromSpawningOn, EmptyPath.Instance);

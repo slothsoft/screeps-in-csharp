@@ -26,4 +26,8 @@ public record PathCollection(params IPath[] Paths) : IPath
     {
         return Paths.SelectMany(p => p.ToPositions());
     }
+
+    public bool Contains(int x, int y) {
+        return Paths.Any(p => p.Contains(x, y));
+    }
 }

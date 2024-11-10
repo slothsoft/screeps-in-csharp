@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using FriendlyWorldBot.Paths;
 using FriendlyWorldBot.Rooms.Creeps;
 using FriendlyWorldBot.Rooms.Structures;
@@ -29,7 +30,7 @@ public static class MemoryUtil {
             ++_ticksSinceLastGc;
         }
     }
-
+    
     public static void CleanMemory(this IGame game) {
         // Delete all creeps in memory that no longer exist
         var clearedCreepsCount = 0;
@@ -45,10 +46,11 @@ public static class MemoryUtil {
         
         // Delete all structures in memory that no longer exist
         var clearedStructuresCount = 0;
-        foreach (var structureType in StructureTypes.All) {
-            if (game.Memory.TryGetObject(structureType.CollectionName, out var memoryStructures)) {
+        var allCurrentStructures = game.Rooms.Values.SelectMany(r => r.Find<IStructure>()).Select(s => s.Id.ToString()).ToArray();
+        foreach (var collectionName in StructureTypes.All.Select(t => t.CollectionName).Distinct()) {
+            if (game.Memory.TryGetObject(collectionName, out var memoryStructures)) {
                 foreach (var structureId in memoryStructures.Keys) {
-                    if (!game.Structures.ContainsKey(structureId)) {
+                    if (!allCurrentStructures.Contains(structureId)) {
                         memoryStructures.ClearValue(structureId);
                         clearedStructuresCount++;
                     }
@@ -58,6 +60,8 @@ public static class MemoryUtil {
 
         if (clearedCreepsCount > 0 || clearedStructuresCount > 0) {
             Logger.Instance.Debug($"Cleared {clearedCreepsCount} dead creeps and {clearedStructuresCount} ruined structures from memory");
+        } else {
+            Logger.Instance.Debug($"Cleared nothing from memory");
         }
     }
 
@@ -117,7 +121,7 @@ public static class MemoryUtil {
         return memory.GetOrCreateObject("killCount");
     }
     
-    public static IPath TryGetPath(this IMemoryObject memory, string id) {
+    public static IPath GetPath(this IMemoryObject memory, string id) {
         return memory.TryGetString(id, out var path) ? path!.Pathify() : EmptyPath.Instance;
     }
     
@@ -125,7 +129,7 @@ public static class MemoryUtil {
         memory.SetValue(id, path.Stringify());
     }
     
-    public static UpgradeStatus TryGetUpgradeStatus(this IMemoryObject memory, string id) {
+    public static UpgradeStatus GetUpgradeStatus(this IMemoryObject memory, string id) {
         return memory.TryGetString(id, out var status) ? Enum.Parse<UpgradeStatus>(status) : UpgradeStatus.NotStartedYet;
     }
     

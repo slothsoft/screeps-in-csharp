@@ -24,7 +24,7 @@ public static class StructureTypes {
     public static readonly StructureType<IStructureTower> Tower = new(MemoryTowers);
     
     // these are all kind of containers
-    public static readonly AutoBuildStructureType<IStructureContainer> Container = new(MemoryContainers, room => room.FindNextSpawnLinePosition());
+    public static readonly StructureType<IStructureContainer> Container = new(MemoryContainers);
     public static readonly AutoBuildStructureType<IStructureContainer> GraveyardContainer = new(MemoryContainers, room => room.FindNextSpawnLinePosition(), ContainerKindGraveyard);
     public static readonly AutoBuildStructureType<IStructureContainer> SourceContainer = new(MemoryContainers, room => room.FindNextSourceContainerPosition(), ContainerKindSource);
     
@@ -41,6 +41,10 @@ public record AutoBuildStructureType<TStructure>(string CollectionName, Func<Roo
     : StructureType<TStructure>(CollectionName, ExpectedKind), IWithAutoBuild
     where TStructure : class, IStructure {
     public Position? FindNextPosition(RoomCache room) => NextPosition(room);
+    
+    public override string ToString() {
+        return "AutoBuildStructureType." + CollectionName + (Kind == null ? string.Empty : $"({Kind})");
+    }
 }
 
 public record StructureType<TStructure> : IStructureType
@@ -64,12 +68,21 @@ public record StructureType<TStructure> : IStructureType
         if (structure is not TStructure) {
             return false;
         }
+
+        return IsMemoryAssignableFrom(structure.GetMemory(CollectionName));
+    }
+
+    public bool IsMemoryAssignableFrom(IMemoryObject memory) {
         if (_expectedKind != null) {
-            if (structure.GetMemory(CollectionName).TryGetString(ContainerKind, out var actualKind)) {
+            if (memory.TryGetString(StructureKind, out var actualKind)) {
                 return actualKind == _expectedKind;
             }
             return false;
         }
-        return true;
+        return !memory.TryGetString(StructureKind, out var shouldBeNull) || string.IsNullOrWhiteSpace(shouldBeNull);
+    }
+
+    public override string ToString() {
+        return "StructureType." + CollectionName + (Kind == null ? string.Empty : $"({Kind})");
     }
 }

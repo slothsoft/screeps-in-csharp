@@ -1,5 +1,6 @@
 using System;
 using FriendlyWorldBot.Rooms.Creeps;
+using FriendlyWorldBot.Rooms.Structures;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API.World;
 
@@ -27,14 +28,20 @@ public class MinerCourierUpgrade : IUpgrade {
     public bool ShouldBeStarted() => _room.Sources.Count == 1;
     
     public UpgradeStatus Run() {
-        Console.WriteLine("MinerCourierUpgrade.Run()");
-        
         // Phase 1: reduce the number of harvesters
         var actualHarvesterCount = _room.Room.GetWantedCreepsPerJob(_creepManager.GetJob(Harvester.JobId));
         if (actualHarvesterCount > ReducedHarvesters) _room.Room.SetWantedCreepsPerJob(Harvester.JobId, ReducedHarvesters);
         
         // Phase 2: make sure we have the source container before we start constructing miners
-        // var (container, constructionSite) = StructureTypes.Source.FindOrCreateConstructionSite(_room);
+        var (container, constructionSite) = _room.FindOrCreateConstructionSite(StructureTypes.SourceContainer);
+        if (container == null) {
+            Console.WriteLine("FOUND SOURCE CONTAINER!");
+        }
+
+        if (constructionSite != null) {
+            Console.WriteLine("FOUND SOURCE CONTAINER CONSTRUCTION SITE!");
+        }
+        
         return UpgradeStatus.InProgress;
     }
 }

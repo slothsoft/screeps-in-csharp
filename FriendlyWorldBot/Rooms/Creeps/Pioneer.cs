@@ -129,7 +129,7 @@ public class Pioneer : IJob {
             .Concat(room.Find<IConstructionSite>().Where(c => c.IsStructure<IStructureSpawn>()))
             .FirstOrDefault();
         if (spawn == null) {
-            var path = flag.Memory.TryGetPath(FlagSpawnCoordinate);
+            var path = flag.Memory.GetPath(FlagSpawnCoordinate);
             if (!path.ToPositions().Any()) {
                 path = CalculateSpawnCoordinate(creep.Room!);
                 flag.Memory.SetValue(FlagSpawnCoordinate, path.Stringify());

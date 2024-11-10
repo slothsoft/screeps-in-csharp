@@ -19,4 +19,6 @@ public record Point(int X, int Y) : IPath {
     public IEnumerable<Position> ToPositions() {
         yield return new Position(X, Y);
     }
+
+    public bool Contains(int x, int y) => X == x && Y == y;
 }

@@ -9,6 +9,6 @@ public record EmptyPath : IPath
     internal static readonly IPath Instance = new EmptyPath();
     
     public string Stringify() => string.Empty;
-
     public IEnumerable<Position> ToPositions() => Array.Empty<Position>();
+    public bool Contains(int x, int y) => false;
 }

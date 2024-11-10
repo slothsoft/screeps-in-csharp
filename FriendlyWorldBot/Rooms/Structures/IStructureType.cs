@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using ScreepsDotNet.API;
 using ScreepsDotNet.API.World;
 
@@ -11,6 +10,7 @@ public interface IStructureType {
     string CollectionName { get; }
     string? Kind { get; }
     bool IsAssignableFrom(IStructure structure);
+    bool IsMemoryAssignableFrom(IMemoryObject memory);
 }
 
 public interface IWithAutoBuild {

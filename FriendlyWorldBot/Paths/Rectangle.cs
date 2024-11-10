@@ -28,4 +28,8 @@ public record Rectangle(int StartX, int StartY, int EndX, int EndY) : IPath {
             }
         }
     }
+
+    public bool Contains(int x, int y) {
+        return x >= StartX && x <= EndX && y >= StartY && y <= EndY;
+    }
 }

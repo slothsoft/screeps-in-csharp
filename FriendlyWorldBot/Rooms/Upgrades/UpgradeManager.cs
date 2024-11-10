@@ -27,7 +27,7 @@ public class UpgradeManager : IManager {
 
         var memory = _room.Room.Memory.GetOrCreateObject(RoomUpgrades);
         foreach (var upgrade in _upgrades) {
-            var status = memory.TryGetUpgradeStatus(upgrade.Id);
+            var status = memory.GetUpgradeStatus(upgrade.Id);
             switch (status) {
                 case UpgradeStatus.NotStartedYet: 
                     if (upgrade.ShouldBeStarted()) {

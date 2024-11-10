@@ -32,4 +32,8 @@ public record Line(int StartX, int StartY, int EndX, int EndY) : IPath {
             yield return new Position((int) Math.Round(StartX + stepX * i), (int) Math.Round(StartY + stepY * i));
         }
     }
+
+    public bool Contains(int x, int y) {
+        return ToPositions().Any(p => p.X == x && p.Y == y);
+    }
 }

@@ -35,6 +35,9 @@ public static class RoomExtensions {
         return constructionResult;
     }
 
+    public static IMemoryObject GetFutureMemory(this IConstructionSite constructionSite)
+        => constructionSite.Room!.FetchFutureMemory(constructionSite.LocalPosition);
+    
     public static IMemoryObject FetchFutureMemory(this IRoom room, Position position)
         => room.Memory.GetOrCreateObject(RoomFutureMemory).GetOrCreateObject(new Point(position.X, position.Y).Stringify());
     

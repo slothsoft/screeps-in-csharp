@@ -36,6 +36,19 @@ dotnet dotnet clean | dotnet publish -c Release
 - undertaker should put into own storage first
 - create different containers with different spawn positions
 
+# Public API
+
+The public API can be found in _[FriendlyWorldBot/js/](./FriendlyWorldBot/js/)_
+
+| Command                  | |                                  |
+|--------------------------|-|----------------------------------|
+| `showJobs(show = true)` | | <img src="readme/show-jobs.png"> |
+| `showExtensions(show = true)` | | ![text](./readme/show-jobs.png)  |
+| `showPaths(show = true)` | |                                  |
+| `showStructureInfo(show = "")` | |                                  |
+
+
+
 # Links
 
 - [Screeps: World](https://store.steampowered.com/app/464350/Screeps_World/)

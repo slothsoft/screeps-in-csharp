@@ -40,12 +40,12 @@ dotnet dotnet clean | dotnet publish -c Release
 
 The public API can be found in _[FriendlyWorldBot/js/](./FriendlyWorldBot/js/)_
 
-| Command                  | |                                  |
-|--------------------------|-|----------------------------------|
-| `showJobs(show = true)` | | <img src="readme/show-jobs.png"> |
-| `showExtensions(show = true)` | | ![text](./readme/show-jobs.png)  |
-| `showPaths(show = true)` | |                                  |
-| `showStructureInfo(show = "")` | |                                  |
+| Command                  | Description |                                                           |
+|--------------------------|-------------|-----------------------------------------------------------|
+| `showJobs(show = true)` |             | <img width="100" height="110" src="readme/show-jobs.png"> |
+| `showExtensions(show = true)` |             |                            |
+| `showPaths(show = true)` |             |                                                           |
+| `showStructureInfo(show = "")` |             |                                                           |
 
 
 

@@ -99,7 +99,7 @@ public static class RoomCacheExtensions {
         return roomCache.Room.CreateConstructionSite<TStructure>(position, futureMemory);
     }
     
-    private static IEnumerable<TStructure> FindOfType<TStructure>(this RoomCache room, IStructureType structureType) 
+    public static IEnumerable<TStructure> FindOfType<TStructure>(this RoomCache room, IStructureType structureType) 
         where TStructure : class, IStructure 
     {
         return room.AllStructures.Where(structureType.IsAssignableFrom).OfType<TStructure>();
@@ -116,17 +116,14 @@ public static class RoomCacheExtensions {
     public static (TStructure?, IConstructionSite?) FindOrCreateConstructionSite<TStructure>(this RoomCache roomCache, AutoBuildStructureType<TStructure> structureType) 
         where TStructure : class, IStructure 
     {
-        if (structureType.Kind == IMemoryConstants.ContainerKindSource) Console.WriteLine("FindOrCreateConstructionSite(" + structureType + ")");
         // find an existing structure
         var (resultStructure, resultConstruction) = roomCache.FindSingleStructureOrConstructionSite(structureType);
         if (resultStructure != null || resultConstruction != null) {
-            if (structureType.Kind == IMemoryConstants.ContainerKindSource) Console.WriteLine("FOUND STRUCTURE");
             return (resultStructure, resultConstruction);
         }
         // find a good place for placement
         var position = structureType.FindNextPosition(roomCache);
         if (position == null) {
-            if (structureType.Kind == IMemoryConstants.ContainerKindSource) Console.WriteLine("FOUND NO POINT");
             return (null, null);
         }
         
@@ -134,10 +131,8 @@ public static class RoomCacheExtensions {
         var createConstruction = roomCache.CreateConstructionSite<TStructure>(structureType, position.Value);
         if (createConstruction == RoomCreateConstructionSiteResult.Ok) {
             var constructionSite = roomCache.Room.LookForAt<IConstructionSite>(position.Value).FirstOrDefault();
-            if (structureType.Kind == IMemoryConstants.ContainerKindSource) Console.WriteLine("CREATE NEW CONSTRUCTION");
             return (null, constructionSite);
         }
-        if (structureType.Kind == IMemoryConstants.ContainerKindSource) Console.WriteLine("FOUND NOTHING " + createConstruction);
         return (null, null);
     }
     

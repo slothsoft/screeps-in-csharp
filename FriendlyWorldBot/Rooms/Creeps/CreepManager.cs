@@ -32,8 +32,9 @@ public class CreepManager : IManager, ICreepsCache {
             new Builder(game, room),
             new Guard(game, room),
             new Harvester(room),
-            // new Miner(room, this),
+            new Miner(room, this),
             new Pioneer(game, room, this),
+            new Scout(game, room),
             new Undertaker(room, this),
             new Upgrader(room),
         };

@@ -11,6 +11,46 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 public static class CreepExtensions {
     
     internal static bool MoveToStoreWithCache(this ICreep creep, RoomCache room, params IStorageType[] storageTypes) {
+        // IRoomObject? target = null;
+        // if (creep.Memory.TryGetString(CreepTarget, out var targetId) && !string.IsNullOrWhiteSpace(targetId)) {
+        //     target = room.Room.Find<IRoomObject>().Where(o => o is IWithId).SingleOrDefault(o => ((IWithId) o).Id.ToString() == targetId);
+        // }
+
+        bool? successful = false;
+        // if (target == null) {
+            (IRoomObject? possibleTarget, successful) = (null, null);
+            foreach (var storageType in storageTypes) {
+                (possibleTarget, successful) = creep.MoveToStoreInType(room, storageType);
+                if (possibleTarget == null) continue; // no target found, so just move on
+                break; // we have a target - no matter what the result is, we can stop searching
+            }
+            if (successful ?? false) {
+                // target = possibleTarget;
+            }
+        // }
+        // FIXME: is the problem that structure store is not used?
+        // if (creep.Store.GetUsedCapacity() == 0) {
+        //     // if the creep is empty, we can remove the target
+        //     target = null;
+        // }
+        //
+        // creep.Memory.SetValue(CreepTarget, target == null? string.Empty : ((IWithId)target).Id.ToString());
+        return successful ?? false;
+    }
+    
+    private static (IRoomObject? Target, bool? Successful) MoveToStoreInType(this ICreep creep, RoomCache room, IStorageType storageType) {
+        if (!storageType.CanStore(ResourceType.Energy)) {
+            creep.LogError($"{storageType} cannot be stored into");
+            return (null, null);
+        }
+        var target = storageType.FindBestToStoreInRoom(creep, room);
+        if (target == null) return (target, null);
+        
+        var result = storageType.Store(creep, target, ResourceType.Energy);
+        return (target, result);
+    }
+    
+    internal static bool MoveToTakeOutWithCache(this ICreep creep, RoomCache room, params IStorageType[] storageTypes) {
         IRoomObject? target = null;
         if (creep.Memory.TryGetString(CreepTarget, out var targetId) && !string.IsNullOrWhiteSpace(targetId)) {
             target = room.Room.Find<IRoomObject>().Where(o => o is IWithId).SingleOrDefault(o => ((IWithId) o).Id.ToString() == targetId);
@@ -20,7 +60,7 @@ public static class CreepExtensions {
         if (target == null) {
             (IRoomObject? possibleTarget, successful) = (null, null);
             foreach (var storageType in storageTypes) {
-                (possibleTarget, successful) = creep.MoveToStorageType(room, storageType);
+                (possibleTarget, successful) = creep.MoveToTakeOutFromType(room, storageType);
                 if (possibleTarget == null) continue; // no target found, so just move on
                 break; // we have a target - no matter what the result is, we can stop searching
             }
@@ -30,7 +70,7 @@ public static class CreepExtensions {
         }
 
         if (creep.Store.GetFreeCapacity() == 0) {
-            // if the creep is empty, we can remove the target
+            // if the creep is full, we can remove the target
             target = null;
         }
         
@@ -38,24 +78,15 @@ public static class CreepExtensions {
         return successful ?? false;
     }
     
-    internal static bool MoveToStore(this ICreep creep, RoomCache room, params IStorageType[] storageTypes) {
-        foreach (var storageType in storageTypes) {
-            var (target, succcesfull) = creep.MoveToStorageType(room, storageType);
-            if (target == null) continue; // no target found, so just move on
-            return succcesfull ?? false;
-        }
-        return false;
-    }
-    
-    private static (IRoomObject? Target, bool? Successful) MoveToStorageType(this ICreep creep, RoomCache room, IStorageType storageType) {
-        if (!storageType.CanStore(ResourceType.Energy)) {
-            creep.LogError($"{storageType} cannot be stored into");
+    private static (IRoomObject? Target, bool? Successful) MoveToTakeOutFromType(this ICreep creep, RoomCache room, IStorageType storageType) {
+        if (!storageType.CanTakeOut(ResourceType.Energy)) {
+            creep.LogError($"{storageType} cannot be taken from");
             return (null, null);
         }
-        var target = storageType.FindBestInRoom(creep, room);
+        var target = storageType.FindBestToTakeOutInRoom(creep, room);
         if (target == null) return (target, null);
         
-        var result = storageType.Store(creep, target, ResourceType.Energy);
+        var result = storageType.TakeOut(creep, target, ResourceType.Energy);
         return (target, result);
     }
     
@@ -365,13 +396,7 @@ public static class CreepExtensions {
             }
         } else {
             // We're empty - go to pick up
-            var spawn = room.Spawns.FindNearest(creep.LocalPosition);
-            if (spawn == null || spawn.Store.GetUsedCapacity() < 10) {
-                // TODO: magic number
-                creep.MoveToHarvestInRoom(room);
-                return;
-            }
-            creep.MoveToWithdraw(spawn);
+            creep.MoveToTakeOutWithCache(room, StorageTypes.DefaultTakeOutOrder);
         }
     }
 }

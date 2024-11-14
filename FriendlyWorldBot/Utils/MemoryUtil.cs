@@ -133,6 +133,10 @@ public static class MemoryUtil {
         return memory.TryGetString(id, out var status) ? Enum.Parse<UpgradeStatus>(status) : UpgradeStatus.NotStartedYet;
     }
     
+    public static void SetUpgradeStatus(this IMemoryObject memory, string id, UpgradeStatus status) {
+        memory.SetValue(id, status.ToString());
+    }
+    
     public static void SetValue(this IMemoryObject memory, string id, UpgradeStatus status) {
         memory.SetValue(id, status.ToString());
     }
@@ -156,7 +160,11 @@ public static class MemoryUtil {
         Logger.Instance.Error("COULD NOT GET MEMORY OF STRUCTURE: " + structure);
         return Program.Game!.Memory;
     }
-
+    
+    public static IMemoryObject GetReconnaissanceData(this IGame game, RoomCoord roomCoord) {
+        return game.Memory.GetOrCreateObject(GameReconnaissanceData).GetOrCreateObject(roomCoord.ToString());
+    }
+    
     public static IMemoryObject GetMemory<TObject>(this TObject obj, string collectionName) 
         where TObject : IWithId, IRoomObject {
         var id = obj is IWithName s ? s.Name : obj.Id;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FriendlyWorldBot.Rooms.Structures;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API.World;
 using static FriendlyWorldBot.Utils.IMemoryConstants;
@@ -42,7 +43,7 @@ public class Builder : IJob {
         } else
         {
             creep.Memory.SetValue(CreepTempTarget, string.Empty);
-            creep.MoveToHarvestInRoom(_room);
+            creep.MoveToTakeOutWithCache(_room, StorageTypes.DefaultTakeOutOrder);
 
             if (creep.Store.GetFreeCapacity(ResourceType.Energy) == 0) {
                 // we cannot mine any longer, so switch to builder mode

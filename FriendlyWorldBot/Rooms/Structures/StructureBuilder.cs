@@ -32,6 +32,7 @@ public partial class StructureBuilder : IManager
     
     public void Tick()
     {
+        if (_room.Room.Controller == null) return; // not my room
         if (_game.Time % BuildEveryTicks != 0) return;
         if (_room.Room.Find<IConstructionSite>().Count() >= MaxConstructionSites) return;
         

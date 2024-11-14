@@ -10,6 +10,7 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 /// </summary>
 public class Harvester : IJob {
     internal const string JobId = "harvester";
+    internal const int DefaultCreepCount = 6;
     private readonly RoomCache _room;
 
     public Harvester(RoomCache room) {
@@ -18,7 +19,7 @@ public class Harvester : IJob {
 
     public string Id => JobId;
     public string Icon => "🧺";
-    public int WantedCreepCount => 6;
+    public int WantedCreepCount => DefaultCreepCount;
     public IEnumerable<BodyPartGroup> BodyPartGroups => IJob.DefaultBodyPartGroups;
     public int Priority => 0;
 

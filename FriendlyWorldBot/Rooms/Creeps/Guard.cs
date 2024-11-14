@@ -18,6 +18,8 @@ public class Guard : IJob {
         BodyPartGroup.Variable(1, 3, BodyPartType.Move), 
         BodyPartGroup.Fixed(1, BodyPartType.Carry), 
     ];
+    private static readonly IStorageType[] StoreOrder = [StorageTypes.Tower, StorageTypes.Container, 
+        StorageTypes.Extensions, StorageTypes.Spawn, StorageTypes.GraveyardContainer];
 
     private readonly IGame _game;
     private readonly RoomCache _room;
@@ -52,10 +54,10 @@ public class Guard : IJob {
         // third priority: collect energy from corpses or ruins?
         if (creep.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
             if (!creep.MoveToPickupLostResources(_room)) {
-                MoveToDrop(creep);
+                creep.MoveToStoreWithCache(_room, StoreOrder);
             }
         } else {
-            MoveToDrop(creep);
+            creep.MoveToStoreWithCache(_room, StoreOrder);
         }
         
         // last priority: move to rampart
@@ -63,26 +65,5 @@ public class Guard : IJob {
         // if (rampart != null) {
         //     creep.BetterMoveTo(rampart.RoomPosition);
         // }
-    }
-
-    private void MoveToDrop(ICreep creep) {
-        var tower = _room.Towers.FindNearest(creep.LocalPosition);
-        if (tower == null) return;
-        if (tower.Store.GetFreeCapacity(ResourceType.Energy) > 0) {
-            var transferResult = creep.Transfer(tower, ResourceType.Energy);
-            if (transferResult == CreepTransferResult.NotInRange) {
-                creep.BetterMoveTo(tower.RoomPosition);
-                return;
-            } 
-            if (transferResult != CreepTransferResult.Ok && transferResult != CreepTransferResult.NotEnoughResources && transferResult != CreepTransferResult.Full) {
-                creep.LogInfo($"unexpected result when transfering to {tower} ({transferResult})");
-            }
-            return;
-        }
-
-        var (container, _) = _room.FindOrCreateConstructionSite<IStructureContainer>(StructureTypes.GraveyardContainer);
-        if (container != null) {
-            creep.MoveToTransferInto(container);
-        }
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using FriendlyWorldBot.Rooms.Creeps;
 using FriendlyWorldBot.Utils;
@@ -19,6 +18,7 @@ public class UpgradeManager : IManager {
         _room = room;
         _upgrades = new List<IUpgrade> {
             new MinerCourierUpgrade(game, room, creepManager),
+            new HarvesterUpgrade(room),
         };
     }
 
@@ -40,7 +40,7 @@ public class UpgradeManager : IManager {
                     memory.SetValue(upgrade.Id, upgrade.Run());
                     break;
                 case UpgradeStatus.Done:
-                default: // UpgradeStatus.Done
+                default: 
                     // we can ignore this status outright
                     break;
             }

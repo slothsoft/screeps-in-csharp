@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using FriendlyWorldBot.Rooms.Structures;
 using FriendlyWorldBot.Utils;
 using ScreepsDotNet.API.World;
 using static FriendlyWorldBot.Utils.IMemoryConstants;
@@ -11,7 +12,7 @@ namespace FriendlyWorldBot.Rooms.Creeps;
 /// </summary>
 public class Miner : IJob {
     private static readonly BodyPartGroup[] MinerBodyPartGroups = [ 
-        BodyPartGroup.Variable(1, 1, BodyPartType.Work), 
+        BodyPartGroup.Variable(1, 6, BodyPartType.Work), 
         BodyPartGroup.Fixed(1, BodyPartType.Move), 
     ];
     
@@ -25,10 +26,7 @@ public class Miner : IJob {
 
     public string Id => "miner";
     public string Icon => "\u26cf\ufe0f";
-    public int WantedCreepCount => _room.Room.Find<IStructureContainer>()
-        .Select(c => c.GetMemory().TryGetString(ContainerKindSource, out var source) ? source : null)
-        .Where(t => !string.IsNullOrWhiteSpace(t))
-        .OfType<string>().Count();
+    public int WantedCreepCount => _room.FindOfType<IStructureContainer>(StructureTypes.SourceContainer).Count();
     public IEnumerable<BodyPartGroup> BodyPartGroups => MinerBodyPartGroups;
     public int Priority => 0;
     
@@ -42,13 +40,11 @@ public class Miner : IJob {
                 .Select(c => c.Memory.TryGetString(CreepTarget, out var target) ? target : null)
                 .Where(t => !string.IsNullOrWhiteSpace(t))
                 .OfType<string>().ToArray();
-            var miningContainerIds = _room.Room.Find<IStructureContainer>()
-                .Where(c => c.GetMemory().TryGetString(ContainerKindSource, out var source) && !string.IsNullOrWhiteSpace(source))
-                .Select(t => t.Id.ToString()).ToList();
+            var miningContainerIds = _room.FindOfType<IStructureContainer>(StructureTypes.SourceContainer).Select(t => t.Id.ToString()).ToList();
             miningContainerIds.RemoveRange(usedContainers);
             targetId = miningContainerIds.FirstOrDefault() ?? usedContainers.FirstOrDefault();
         }
-        var target = _room.Room.Find<IStructureContainer>().SingleOrDefault(c => c.Id == targetId);
+        var target = _room.FindOfType<IStructureContainer>(StructureTypes.SourceContainer).SingleOrDefault(c => c.Id == targetId);
         if (target == null) {
             creep.LogError($"Could not find mining container in room {_room.Room.Name}");
             return; // we could not find a container
@@ -60,7 +56,14 @@ public class Miner : IJob {
             return;
         }
 
-        var source = target.GetMemory().TryGetString(ContainerKindSource, out var sourceId) ? _room.Sources.Single(s => s.Id == sourceId) : null;
+        var targetMemory = target.GetMemory();
+        ISource? source = null;
+        if (targetMemory.TryGetString(ContainerKindSource, out var sourceId)) {
+            source = _room.Sources.Single(s => s.Id.ToString() == sourceId);
+        } else {
+            source = _room.Sources.FindNearest(creep.LocalPosition);
+            targetMemory.SetValue(ContainerKindSource, source?.Id ?? string.Empty);
+        }
         if (source == null) {
             creep.LogError($"Could not find source for container {target.Id} in room {_room.Room.Name}");
             return;
